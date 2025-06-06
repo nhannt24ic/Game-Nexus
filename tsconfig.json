@@ -1,0 +1,14 @@
+// tsconfig.json
+{
+  "compilerOptions": {
+    "target": "ES2020",                        /* Đặt phiên bản JavaScript đầu ra */
+    "module": "commonjs",                     /* Chỉ định hệ thống module: 'commonjs' cho Node.js */
+    "rootDir": "./src",                       /* Thư mục gốc chứa các file .ts */
+    "outDir": "./dist",                       /* Thư mục đầu ra cho các file .js đã biên dịch */
+    "esModuleInterop": true,                  /* Cho phép tương tác tốt hơn giữa CommonJS và ES Modules */
+    "forceConsistentCasingInFileNames": true, /* Đảm bảo tên file nhất quán */
+    "strict": true,                           /* Bật tất cả các tùy chọn kiểm tra kiểu nghiêm ngặt */
+    "skipLibCheck": true                      /* Bỏ qua việc kiểm tra kiểu của các file khai báo (.d.ts) */
+  },
+  "include": ["src/**/*"] // Chỉ biên dịch các file trong thư mục src
+}

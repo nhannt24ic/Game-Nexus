@@ -1,0 +1,109 @@
+// src/controllers/userController.ts
+import { Request, Response } from 'express';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import db from '../config/db';
+import { RowDataPacket } from 'mysql2';
+
+// Định nghĩa một interface cho User để TypeScript hiểu cấu trúc
+interface User extends RowDataPacket {
+    id: number;
+    username: string;
+    password_hash: string;
+    role: 'member' | 'moderator' | 'admin';
+    status: 'active' | 'locked';
+}
+
+// Thêm kiểu trả về `: Promise<void>`
+export const registerUser = async (req: Request, res: Response): Promise<void> => {
+    const { username, email, password, nickname } = req.body;
+
+    if (!username || !email || !password || !nickname) {
+        // Bỏ `return` ở đây, thêm `return;` ở dòng dưới
+        res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin.' });
+        return;
+    }
+
+    try {
+        const [existingUsers] = await db.query<User[]>(
+            'SELECT id FROM users WHERE username = ? OR email = ?',
+            [username, email]
+        );
+
+        if (existingUsers.length > 0) {
+            res.status(409).json({ message: 'Username hoặc email đã tồn tại.' });
+            return;
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const password_hash = await bcrypt.hash(password, salt);
+
+        const [result] = await db.query<any>(
+            'INSERT INTO users (username, email, password_hash, nickname) VALUES (?, ?, ?, ?)',
+            [username, email, password_hash, nickname]
+        );
+
+        res.status(201).json({
+            message: 'Đăng ký tài khoản thành công!',
+            userId: result.insertId
+        });
+
+    } catch (error) {
+        console.error('Lỗi khi đăng ký người dùng:', error);
+        res.status(500).json({ message: 'Đã có lỗi xảy ra trên máy chủ.' });
+    }
+};
+
+// Thêm kiểu trả về `: Promise<void>`
+export const loginUser = async (req: Request, res: Response): Promise<void> => {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+        res.status(400).json({ message: 'Vui lòng nhập username và password.' });
+        return;
+    }
+
+    try {
+        const [users] = await db.query<User[]>(
+            'SELECT id, username, password_hash, role, status FROM users WHERE username = ?',
+            [username]
+        );
+
+        const user = users[0];
+
+        if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+            res.status(401).json({ message: 'Username hoặc mật khẩu không chính xác.' });
+            return;
+        }
+
+        if (user.status === 'locked') {
+            res.status(403).json({ message: 'Tài khoản này đã bị khóa.' });
+            return;
+        }
+
+        const payload = {
+            id: user.id,
+            username: user.username,
+            role: user.role
+        };
+        
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+            console.error('JWT_SECRET chưa được định nghĩa trong file .env');
+            // Gửi lỗi một cách an toàn mà không tiết lộ chi tiết
+            res.status(500).json({ message: 'Lỗi cấu hình máy chủ.' });
+            return;
+        }
+
+        const token = jwt.sign(payload, secret, { expiresIn: '1d' });
+
+        res.status(200).json({
+            message: 'Đăng nhập thành công!',
+            token: token
+        });
+
+    } catch (error) {
+        console.error('Lỗi khi đăng nhập:', error);
+        res.status(500).json({ message: 'Đã có lỗi xảy ra trên máy chủ.' });
+    }
+};
