@@ -1,7 +1,7 @@
 // src/controllers/userController.ts
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 import db from '../config/db';
 import { RowDataPacket } from 'mysql2';
 
@@ -106,4 +106,41 @@ export const loginUser = async (req: Request, res: Response): Promise<void> => {
         console.error('Lỗi khi đăng nhập:', error);
         res.status(500).json({ message: 'Đã có lỗi xảy ra trên máy chủ.' });
     }
+};
+
+export const getTopActiveUsers = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const [users] = await db.query<RowDataPacket[]>(`
+      SELECT id, nickname, avatar_url, points 
+      FROM users
+      ORDER BY points DESC
+      LIMIT 10
+    `);
+    res.status(200).json(users);
+  } catch (error) {
+    console.error('Lỗi khi lấy top người dùng:', error);
+    res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
+};
+
+export const getCurrentUserProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    // Lấy id từ token đã được authMiddleware giải mã và gắn vào req.user
+    const userId = (req.user as JwtPayload).id;
+
+    const [users] = await db.query<RowDataPacket[]>(
+      'SELECT id, username, nickname, avatar_url FROM users WHERE id = ?',
+      [userId]
+    );
+
+    if (users.length === 0) {
+      res.status(404).json({ message: 'Không tìm thấy người dùng.' });
+      return;
+    }
+
+    res.status(200).json(users[0]);
+  } catch (error) {
+    console.error('Lỗi khi lấy thông tin cá nhân:', error);
+    res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
 };

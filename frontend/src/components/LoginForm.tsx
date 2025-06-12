@@ -48,7 +48,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ switchToRegister }) => {
       const successData: LoginSuccessResponse = await response.json();
       
       setMessage('Đăng nhập thành công! Đang chuyển hướng...');
-      console.log('Token nhận được:', successData.token);
+      localStorage.setItem('token', successData.token); // Lưu token
+      window.location.href = '/'; // Chuyển hướng về trang chủ
       
     } catch (err) {
       // --- Xử lý lỗi trong khối catch một cách an toàn ---

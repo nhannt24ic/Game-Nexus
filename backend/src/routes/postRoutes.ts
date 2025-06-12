@@ -1,6 +1,6 @@
 // src/routes/postRoutes.ts
 import express from 'express';
-import { createPost, toggleLikePost, createComment } from '../controllers/postController';
+import { createPost, toggleLikePost, createComment, getAllPosts } from '../controllers/postController';
 import authMiddleware from '../middlewares/authMiddleware';
 import { uploadPostImage, uploadCommentImage } from '../config/upload';
 
@@ -12,5 +12,6 @@ const router = express.Router();
 router.post('/', authMiddleware, uploadPostImage.array('postImages', 10), createPost);
 router.post('/:postId/like', authMiddleware, toggleLikePost);
 router.post('/:postId/comments', authMiddleware, uploadCommentImage.single('commentImage'), createComment);
+router.get('/', authMiddleware, getAllPosts);
 
 export default router;

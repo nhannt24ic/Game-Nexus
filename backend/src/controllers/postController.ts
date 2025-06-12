@@ -2,8 +2,7 @@
 import { Request, Response } from 'express';
 import db from '../config/db';
 import { JwtPayload } from 'jsonwebtoken';
-
-// Thay thế hàm createPost cũ bằng hàm này trong file: src/controllers/postController.ts
+import { RowDataPacket } from 'mysql2';
 
 export const createPost = async (req: Request, res: Response): Promise<void> => {
     const userId = (req.user as JwtPayload).id;
@@ -171,8 +170,6 @@ export const toggleLikePost = async (req: Request, res: Response): Promise<void>
     }
 };
 
-// Thêm hàm này vào file src/controllers/postController.ts
-
 export const createComment = async (req: Request, res: Response): Promise<void> => {
     const userId = (req.user as JwtPayload).id;
     const postId = parseInt(req.params.postId, 10);
@@ -212,4 +209,37 @@ export const createComment = async (req: Request, res: Response): Promise<void> 
         console.error('Lỗi khi bình luận:', error);
         res.status(500).json({ message: 'Đã có lỗi xảy ra trên máy chủ.' });
     }
+};
+
+export const getAllPosts = async (req: Request, res: Response): Promise<void> => {
+  // Lấy tham số phân trang từ query string, ví dụ: /api/posts?page=1&limit=10
+  const page = parseInt(req.query.page as string, 10) || 1;
+  const limit = parseInt(req.query.limit as string, 10) || 10;
+  const offset = (page - 1) * limit;
+
+  try {
+    const [posts] = await db.query<RowDataPacket[]>(`
+      SELECT 
+        p.id, 
+        p.content, 
+        p.created_at,
+        u.nickname AS author_nickname,
+        u.avatar_url AS author_avatar,
+        (SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS like_count,
+        (SELECT COUNT(*) FROM comments WHERE post_id = p.id) AS comment_count,
+        -- DÒNG THAY ĐỔI: Dùng GROUP_CONCAT thay cho JSON_ARRAYAGG
+        (SELECT CONCAT('[', GROUP_CONCAT(JSON_OBJECT('id', pi.id, 'url', pi.image_url)), ']') FROM post_images pi WHERE pi.post_id = p.id) AS images
+        FROM posts p
+        JOIN users u ON p.user_id = u.id
+        WHERE p.status = 'approved'
+        ORDER BY p.created_at DESC
+        LIMIT ?
+        OFFSET ?
+    `, [limit, offset]);
+
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách bài viết:', error);
+    res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
 };
