@@ -1,12 +1,26 @@
 // src/components/layout/LeftSidebar.tsx
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import HomeIcon from '../icons/HomeIcon';
 import FriendsIcon from '../icons/FriendsIcon';
 import EventsIcon from '../icons/EventsIcon';
 import ContactIcon from '../icons/ContactIcon';
+import Avatar from '../common/Avatar';
 
 const LeftSidebar: React.FC = () => {
+  const [user, setUser] = useState<{nickname: string, avatar_url: string|null} | null>(null);
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    fetch('http://localhost:3000/api/users/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) setUser({ nickname: data.nickname, avatar_url: data.avatar_url });
+      });
+  }, []);
+
   const menuItems = [
     { icon: HomeIcon, label: 'Home', active: true },
     { icon: FriendsIcon, label: 'Friends', count: 12 },
@@ -26,11 +40,9 @@ const LeftSidebar: React.FC = () => {
       {/* Profile Card */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold">JD</span>
-          </div>
+          <Avatar user={{ id: 0, nickname: user ? user.nickname : '...', avatar_url: user ? user.avatar_url : null }} className="w-12 h-12 border-2 border-cyber-purple" />
           <div>
-            <h3 className="font-semibold text-gray-900">John Doe</h3>
+            <h3 className="font-semibold text-gray-900">{user ? user.nickname : '...'}</h3>
             <p className="text-sm text-gray-500">Level 42 Gamer</p>
           </div>
         </div>

@@ -13,7 +13,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, init
   const [postContent, setPostContent] = useState('');
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [selectedGame, setSelectedGame] = useState('');
-  const [privacy, setPrivacy] = useState('public');
   const [isLoading, setIsLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGameSelector, setShowGameSelector] = useState(false);
@@ -53,7 +52,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, init
         content: postContent,
         images: selectedImages,
         game: selectedGame,
-        privacy,
         type: initialType
       });
       
@@ -61,7 +59,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, init
       setPostContent('');
       setSelectedImages([]);
       setSelectedGame('');
-      setPrivacy('public');
       setShowEmojiPicker(false);
       setShowGameSelector(false);
       setIsLoading(false);
@@ -125,16 +122,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, init
             )}
             <div>
               <h3 className="font-semibold text-gray-900">{user ? user.nickname : '...'}</h3>
-              <select
-                value={privacy}
-                onChange={(e) => setPrivacy(e.target.value)}
-                className="text-sm text-gray-600 bg-gray-100 border-0 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="public">🌍 Public</option>
-                <option value="friends">👥 Friends</option>
-                <option value="gaming">🎮 Gaming Friends</option>
-                <option value="private">🔒 Only Me</option>
-              </select>
             </div>
           </div>
         </div>

@@ -6,12 +6,14 @@ import LeftSidebar from '../components/layout/LeftSidebar';
 import RightSidebar from '../components/layout/RightSidebar';
 import PostFeed from '../components/feed/PostFeed';
 import CreatePostModal from '../components/feed/CreatePostModal';
+import Avatar from '../components/common/Avatar'; // Đúng path
+import type { User } from '../types';
 
 const HomePage: React.FC = () => {
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
   const [activePostType, setActivePostType] = useState<'general' | 'photo' | 'game' | 'stream'>('general');
   const [reloadFeed, setReloadFeed] = useState(0);
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -66,9 +68,17 @@ const HomePage: React.FC = () => {
             {/* Create Post Section */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
               <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold">JD</span>
-                </div>
+                {/* Sử dụng component Avatar với dữ liệu thực tế */}
+                {currentUser ? (
+                  <Avatar
+                    user={currentUser}
+                    className="w-10 h-10"
+                  />
+                ) : (
+                  <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+                    <span className="text-white font-bold">?</span>
+                  </div>
+                )}
                 <div className="flex-1">
                   <button 
                     onClick={() => handleOpenCreatePost('general')}
@@ -129,7 +139,7 @@ const HomePage: React.FC = () => {
               </div>
             </div>
             {/* Post Feed */}
-            <PostFeed reloadFeed={reloadFeed} />
+            <PostFeed key={reloadFeed} />
           </div>
           {/* Right Sidebar */}
           <div className="lg:col-span-3">
