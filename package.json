@@ -2,11 +2,11 @@
   "name": "gamenexus",
   "version": "1.0.0",
   "main": "index.js",
-"scripts": {
-  "build": "npx tsc",
-  "start": "node dist/server.js",
-  "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
-},
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -16,12 +16,14 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "multer": "^2.0.1",
     "mysql2": "^3.14.1"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/express": "^5.0.2",
     "@types/jsonwebtoken": "^9.0.9",
+    "@types/multer": "^1.4.13",
     "@types/node": "^22.15.30",
     "nodemon": "^3.1.10",
     "ts-node-dev": "^2.0.0",

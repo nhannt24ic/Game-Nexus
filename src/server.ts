@@ -3,6 +3,7 @@ import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import userRoutes from './routes/userRoutes'; // Tự động nhận file .ts
 import postRoutes from './routes/postRoutes';
+import path from 'path';
 dotenv.config();
 
 const app: Express = express();
@@ -23,3 +24,5 @@ app.get('/', (req: Request, res: Response) => {
 app.listen(PORT, () => {
     console.log(`Server TypeScript đang chạy trên cổng http://localhost:${PORT}`);
 });
+
+app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
