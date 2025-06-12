@@ -1,14 +1,17 @@
 // src/server.ts
 import express, { Express, Request, Response } from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import userRoutes from './routes/userRoutes'; // Tự động nhận file .ts
 import postRoutes from './routes/postRoutes';
 import path from 'path';
-import cors from 'cors';
+
 dotenv.config();
 
 const app: Express = express();
 const PORT = process.env.PORT || 3001;
+
+app.use(cors());
 
 // Middlewares
 app.use(express.json());
@@ -27,5 +30,3 @@ app.listen(PORT, () => {
 });
 
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
-
-app.use(cors());
