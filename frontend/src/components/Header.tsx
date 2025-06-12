@@ -58,7 +58,7 @@ const Header: React.FC = () => {
             <div className="relative">
               <input 
                 type="text" 
-                placeholder="Tìm kiếm Game Nexus..."
+                placeholder="Tìm kiếm"
                 className="bg-gray-800/80 text-white rounded-full pl-10 pr-4 py-2 w-56 md:w-64 focus:outline-none focus:ring-2 focus:ring-cyber-purple border border-gray-700 shadow-inner"
               />
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-cyber-purple">

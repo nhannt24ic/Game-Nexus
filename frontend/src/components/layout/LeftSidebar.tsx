@@ -60,7 +60,7 @@ const LeftSidebar: React.FC = () => {
       {error && <p className="text-red-500">{error}</p>}
       {!loading && !error && (
         <ul className="space-y-3">
-          {topUsers.map((user, index) => (
+          {topUsers.slice(0, 3).map((user, index) => (
             <li key={user.id} className={`flex items-center space-x-3 p-2 rounded-xl transition-all group ${index === 0 ? 'bg-gradient-to-r from-cyber-purple/30 to-cyber-blue/20 shadow-lg scale-105' : 'hover:bg-gray-800/70'}` }>
               <span className={`font-bold w-6 text-center ${index === 0 ? 'text-cyber-purple text-xl drop-shadow' : 'text-gray-400'}`}>#{index + 1}</span>
               <Avatar user={user} className={`w-11 h-11 border-2 ${index === 0 ? 'border-cyber-purple ring-2 ring-cyber-blue' : 'border-gray-700 group-hover:border-cyber-purple'}`} />

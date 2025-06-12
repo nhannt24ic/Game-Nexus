@@ -46,14 +46,21 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
       )}
       {/* Thống kê like/comment */}
       <div className="flex justify-between items-center text-cyber-purple border-b border-gray-800 pb-2 mb-3">
-        <span className="font-semibold"><svg className="inline w-5 h-5 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 15a7 7 0 0014 0V7a7 7 0 00-14 0v8z"/></svg>{post.like_count} lượt thích</span>
-        <span className="font-semibold"><svg className="inline w-5 h-5 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h12a2 2 0 012 2z"/></svg>{post.comment_count} bình luận</span>
+        <span className="font-semibold">
+          {/* Heart icon */}
+          <svg className="inline w-5 h-5 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path d="M12 21C12 21 4 13.5 4 8.5C4 5.42 6.42 3 9.5 3C11.24 3 12.91 3.81 14 5.08C15.09 3.81 16.76 3 18.5 3C21.58 3 24 5.42 24 8.5C24 13.5 16 21 16 21H12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+          </svg>
+          {post.like_count} lượt thích
+        </span>
+        <span className="font-semibold">
+          <svg className="inline w-5 h-5 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h12a2 2 0 012 2z"/></svg>{post.comment_count} bình luận
+        </span>
       </div>
       {/* Nút hành động */}
       <div className="flex justify-around items-center gap-2">
-        <button className="flex-1 text-center py-2 rounded-xl font-semibold text-cyber-purple bg-gray-800/70 hover:bg-cyber-purple hover:text-white transition-colors">Thích</button>
+        <button className="flex-1 text-center py-2 rounded-xl font-semibold text-cyber-purple bg-gray-800/70 hover:bg-cyber-purple hover:text-white transition-colors">Yêu thích</button>
         <button className="flex-1 text-center py-2 rounded-xl font-semibold text-cyber-purple bg-gray-800/70 hover:bg-cyber-purple hover:text-white transition-colors">Bình luận</button>
-        <button className="flex-1 text-center py-2 rounded-xl font-semibold text-cyber-purple bg-gray-800/70 hover:bg-cyber-purple hover:text-white transition-colors">Chia sẻ</button>
       </div>
     </div>
   );
