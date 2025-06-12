@@ -1,87 +1,83 @@
-// src/components/Header.tsx
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import HomeIcon from './icons/HomeIcon'; // Import icon component
+import HomeIcon from './icons/HomeIcon';
 import FriendsIcon from './icons/FriendsIcon';
 import EventsIcon from './icons/EventsIcon';
 import ContactIcon from './icons/ContactIcon';
 import Avatar from './common/Avatar';
 
-// Định nghĩa kiểu dữ liệu cho người dùng
-interface CurrentUser {
-  id: number;
-  nickname: string;
-  avatar_url: string | null;
-}
-
 const Header: React.FC = () => {
-  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
 
-  // Lấy thông tin người dùng khi component được mount
   useEffect(() => {
-    const fetchCurrentUser = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) return;
-
-      try {
-        const response = await fetch('http://localhost:3000/api/users/me', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (response.ok) {
-          const data: CurrentUser = await response.json();
-          setCurrentUser(data);
-        }
-      } catch (error) {
-        console.error("Không thể lấy thông tin người dùng:", error);
-      }
-    };
-    fetchCurrentUser();
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    fetch('http://localhost:3000/api/users/me', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+        if (data) setCurrentUser(data);
+      });
   }, []);
-  
-  // Xử lý đăng xuất
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
   };
 
   return (
-    <header className="bg-gray-900/90 shadow-xl fixed top-0 left-0 right-0 z-50 backdrop-blur-md border-b border-gray-800">
-      <div className="container mx-auto px-4">
-        <div className="flex justify-between items-center h-16 relative">
-          {/* Logo và Search */}
-          <div className="flex items-center space-x-6">
-            <Link to="/" className="text-3xl font-extrabold text-cyber-purple tracking-tight drop-shadow-lg hover:scale-105 transition-transform duration-200">
-              <span className="bg-gradient-to-r from-cyber-purple to-cyber-blue bg-clip-text text-transparent">GN</span>
-            </Link>
+    <header className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b border-gray-200 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
+              <span className="text-white font-bold text-lg">G</span>
+            </div>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              GameNexus
+            </h1>
+          </div>
+
+          {/* Search Bar */}
+          <div className="flex-1 max-w-2xl mx-8">
             <div className="relative">
-              <input 
-                type="text" 
-                placeholder="Tìm kiếm"
-                className="bg-gray-800/80 text-white rounded-full pl-10 pr-4 py-2 w-56 md:w-64 focus:outline-none focus:ring-2 focus:ring-cyber-purple border border-gray-700 shadow-inner"
+              <input
+                type="text"
+                placeholder="Search games, players, or communities..."
+                className="w-full px-4 py-2 pl-10 bg-gray-100 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
               />
-              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-cyber-purple">
-                {/* Search Icon */}
-                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z"/></svg>
+              <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
             </div>
           </div>
-          {/* Navigation Icons - căn giữa tuyệt đối */}
-          <nav className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center space-x-10">
-            <Link to="/" className="text-gray-300 hover:text-cyber-purple transition-colors p-2 flex items-center justify-center">
-              <HomeIcon className="w-7 h-7" />
-            </Link>
-            <Link to="/friends" className="text-gray-300 hover:text-cyber-purple transition-colors p-2 flex items-center justify-center">
-              <FriendsIcon className="w-7 h-7" />
-            </Link>
-            <Link to="/events" className="text-gray-300 hover:text-cyber-purple transition-colors p-2 flex items-center justify-center">
-              <EventsIcon className="w-7 h-7" />
-            </Link>
-            <Link to="/contact" className="text-gray-300 hover:text-cyber-purple transition-colors p-2 flex items-center justify-center">
-              <ContactIcon className="w-7 h-7" />
-            </Link>
-          </nav>
+
+          {/* Navigation Icons */}
+          <div className="flex items-center space-x-4">
+            <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </button>
+            <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200 relative">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM9 7H4l5-5v5z" />
+              </svg>
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+            </button>
+            <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </button>
+          </div>
+
           {/* Avatar & Dropdown */}
           <div className="relative">
             {currentUser ? (
@@ -99,13 +95,6 @@ const Header: React.FC = () => {
                 <div className="px-4 py-2 border-b border-gray-800">
                   <p className="font-semibold text-white">{currentUser?.nickname}</p>
                 </div>
-                <Link 
-                  to={`/profile/${currentUser?.id}`}
-                  className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800/80 rounded-lg"
-                  onClick={() => setIsDropdownOpen(false)}
-                >
-                  Trang cá nhân
-                </Link>
                 <button 
                   onClick={handleLogout}
                   className="w-full text-left block px-4 py-2 text-sm text-red-400 hover:bg-gray-800/80 rounded-lg"

@@ -1,77 +1,106 @@
 // src/components/layout/LeftSidebar.tsx
 
-import React, { useState, useEffect } from 'react';
-import Avatar from '../common/Avatar';
-
-// 1. Định nghĩa kiểu dữ liệu cho một người dùng trong danh sách top
-interface TopUser {
-  id: number;
-  nickname: string;
-  avatar_url: string | null;
-  points: number;
-}
+import React from 'react';
+import HomeIcon from '../icons/HomeIcon';
+import FriendsIcon from '../icons/FriendsIcon';
+import EventsIcon from '../icons/EventsIcon';
+import ContactIcon from '../icons/ContactIcon';
 
 const LeftSidebar: React.FC = () => {
-  // 2. Tạo các state để lưu danh sách người dùng, trạng thái tải và lỗi
-  const [topUsers, setTopUsers] = useState<TopUser[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const menuItems = [
+    { icon: HomeIcon, label: 'Home', active: true },
+    { icon: FriendsIcon, label: 'Friends', count: 12 },
+    { icon: EventsIcon, label: 'Events', count: 3 },
+    { icon: ContactIcon, label: 'Messages', count: 5 },
+  ];
 
-  // 3. Dùng useEffect để gọi API một lần khi component được render
-  useEffect(() => {
-    const fetchTopUsers = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          throw new Error("Không tìm thấy token xác thực.");
-        }
+  const shortcuts = [
+    { name: 'Gaming Squad', avatar: '🎮', online: true },
+    { name: 'Esports Team', avatar: '🏆', online: false },
+    { name: 'Casual Gamers', avatar: '🎯', online: true },
+    { name: 'Streamers Hub', avatar: '📺', online: true },
+  ];
 
-        const response = await fetch('http://localhost:3000/api/users/top', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Không thể tải bảng xếp hạng.');
-        }
-
-        const data: TopUser[] = await response.json();
-        setTopUsers(data);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError('Một lỗi không mong muốn đã xảy ra.');
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTopUsers();
-  }, []); // Mảng rỗng `[]` đảm bảo useEffect chỉ chạy 1 lần
-
-  // 4. Render giao diện dựa trên các state
   return (
-    <div className="bg-gray-900/90 p-5 rounded-2xl shadow-xl border border-gray-800">
-      <h3 className="text-xl font-extrabold text-cyber-purple mb-5 tracking-tight">Bảng Xếp Hạng</h3>
-      {loading && <p className="text-gray-400">Đang tải...</p>}
-      {error && <p className="text-red-500">{error}</p>}
-      {!loading && !error && (
-        <ul className="space-y-3">
-          {topUsers.slice(0, 3).map((user, index) => (
-            <li key={user.id} className={`flex items-center space-x-3 p-2 rounded-xl transition-all group ${index === 0 ? 'bg-gradient-to-r from-cyber-purple/30 to-cyber-blue/20 shadow-lg scale-105' : 'hover:bg-gray-800/70'}` }>
-              <span className={`font-bold w-6 text-center ${index === 0 ? 'text-cyber-purple text-xl drop-shadow' : 'text-gray-400'}`}>#{index + 1}</span>
-              <Avatar user={user} className={`w-11 h-11 border-2 ${index === 0 ? 'border-cyber-purple ring-2 ring-cyber-blue' : 'border-gray-700 group-hover:border-cyber-purple'}`} />
-              <div className="flex-grow">
-                <p className="font-semibold text-white group-hover:text-cyber-purple transition-colors">{user.nickname}</p>
-                <p className="text-sm text-cyber-purple">{user.points} điểm</p>
+    <div className="space-y-6">
+      {/* Profile Card */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
+            <span className="text-white font-bold">JD</span>
+          </div>
+          <div>
+            <h3 className="font-semibold text-gray-900">John Doe</h3>
+            <p className="text-sm text-gray-500">Level 42 Gamer</p>
+          </div>
+        </div>
+        <div className="mt-4 flex items-center justify-between text-sm">
+          <div className="text-center">
+            <div className="font-semibold text-gray-900">1.2K</div>
+            <div className="text-gray-500">Friends</div>
+          </div>
+          <div className="text-center">
+            <div className="font-semibold text-gray-900">89</div>
+            <div className="text-gray-500">Games</div>
+          </div>
+          <div className="text-center">
+            <div className="font-semibold text-gray-900">456</div>
+            <div className="text-gray-500">Hours</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Menu */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4">
+          <h3 className="font-semibold text-gray-900 mb-3">Menu</h3>
+          <nav className="space-y-1">
+            {menuItems.map((item, index) => (
+              <a
+                key={index}
+                href="#"
+                className={`flex items-center justify-between px-3 py-2 rounded-lg transition-colors duration-200 ${
+                  item.active
+                    ? 'bg-blue-50 text-blue-600 border border-blue-200'
+                    : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <item.icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </div>
+                {item.count && (
+                  <span className="bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                    {item.count}
+                  </span>
+                )}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </div>
+
+      {/* Shortcuts */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4">
+          <h3 className="font-semibold text-gray-900 mb-3">Your Groups</h3>
+          <div className="space-y-3">
+            {shortcuts.map((group, index) => (
+              <div key={index} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                <div className="relative">
+                  <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                    <span className="text-sm">{group.avatar}</span>
+                  </div>
+                  {group.online && (
+                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                  )}
+                </div>
+                <span className="text-sm font-medium text-gray-700">{group.name}</span>
               </div>
-            </li>
-          ))}
-        </ul>
-      )}
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,82 +1,109 @@
-// src/components/layout/RightSidebar.tsx
-
-import React, { useState, useEffect } from 'react';
-import Avatar from '../common/Avatar';
-// 1. Định nghĩa kiểu dữ liệu cho một người bạn
-interface Friend {
-  id: number;
-  nickname: string;
-  avatar_url: string | null;
-}
+import React from 'react';
 
 const RightSidebar: React.FC = () => {
-  // 2. Tạo các state cho danh sách bạn bè, trạng thái tải và lỗi
-  const [friends, setFriends] = useState<Friend[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const onlineFriends = [
+    { name: 'Alex Chen', game: 'Valorant', avatar: '🎯', status: 'In Game' },
+    { name: 'Sarah Kim', game: 'League of Legends', avatar: '⚔️', status: 'Online' },
+    { name: 'Mike Johnson', game: 'CS:GO', avatar: '🔫', status: 'In Game' },
+    { name: 'Emma Wilson', game: 'Overwatch', avatar: '🛡️', status: 'Online' },
+    { name: 'David Lee', game: 'Apex Legends', avatar: '🎮', status: 'Away' },
+  ];
 
-  // 3. Dùng useEffect để gọi API
-  useEffect(() => {
-    const fetchFriends = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error("Không tìm thấy token xác thực.");
-
-        const response = await fetch('http://localhost:3000/api/friends', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Không thể tải danh sách bạn bè.');
-        }
-
-        const data: Friend[] = await response.json();
-        setFriends(data);
-      } catch (err) {
-        if (err instanceof Error) setError(err.message);
-        else setError('Lỗi không xác định');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchFriends();
-  }, []);
+  const trendingGames = [
+    { name: 'Valorant', players: '2.1M', trend: '+12%' },
+    { name: 'League of Legends', players: '8.5M', trend: '+5%' },
+    { name: 'CS:GO', players: '1.8M', trend: '+8%' },
+    { name: 'Overwatch 2', players: '3.2M', trend: '+15%' },
+  ];
 
   return (
-    <div className="bg-gray-900/90 p-5 rounded-2xl shadow-xl border border-gray-800 space-y-8">
-      {/* Danh sách bạn bè */}
-      <div>
-        <h3 className="text-xl font-extrabold text-cyber-purple mb-5 tracking-tight">Bạn bè</h3>
-        {loading && <p className="text-gray-400">Đang tải...</p>}
-        {error && <p className="text-red-500">{error}</p>}
-        {!loading && !error && (
-          <ul className="space-y-4">
-            {friends.length > 0 ? (
-              friends.map(friend => (
-                <li key={friend.id} className="flex items-center space-x-3 p-2 rounded-xl hover:bg-gray-800/70 transition-all group">
-                  <div className="relative">
-                    <Avatar user={friend} className="w-11 h-11 border-2 border-cyber-purple group-hover:ring-2 group-hover:ring-cyber-blue transition-all" />
-                    <span className="absolute bottom-0 right-0 block h-3 w-3 rounded-full bg-green-500 border-2 border-gray-900"></span>
+    <div className="space-y-6">
+      {/* Online Friends */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-gray-900">Friends Online</h3>
+            <span className="text-sm text-green-500 font-medium">{onlineFriends.length} online</span>
+          </div>
+        </div>
+        <div className="p-4">
+          <div className="space-y-3">
+            {onlineFriends.map((friend, index) => (
+              <div key={index} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                <div className="relative">
+                  <div className="w-10 h-10 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm">{friend.avatar}</span>
                   </div>
-                  <span className="font-semibold text-white group-hover:text-cyber-purple transition-colors">{friend.nickname}</span>
-                </li>
-              ))
-            ) : (
-              <p className="text-gray-400 text-sm">Bạn chưa có người bạn nào.</p>
-            )}
-          </ul>
-        )}
+                  <div className={`absolute -bottom-1 -right-1 w-3 h-3 border-2 border-white rounded-full ${
+                    friend.status === 'In Game' ? 'bg-orange-500' : 
+                    friend.status === 'Online' ? 'bg-green-500' : 'bg-yellow-500'
+                  }`}></div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{friend.name}</p>
+                  <p className="text-xs text-gray-500 truncate">{friend.game}</p>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <button className="p-1 text-gray-400 hover:text-blue-500 transition-colors duration-200">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
-      {/* Nhóm */}
-      <div>
-        <h3 className="text-xl font-extrabold text-cyber-purple mb-5 tracking-tight flex items-center gap-2">
-          <svg width="20" height="20" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" strokeWidth="2" d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4.418 0-8 1.79-8 4v2h16v-2c0-2.21-3.582-4-8-4z"/></svg>
-          Nhóm của bạn
-        </h3>
-        <p className="text-gray-400 text-sm">Tính năng đang được phát triển.</p>
+
+      {/* Trending Games */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4 border-b border-gray-100">
+          <h3 className="font-semibold text-gray-900">Trending Games</h3>
+        </div>
+        <div className="p-4">
+          <div className="space-y-3">
+            {trendingGames.map((game, index) => (
+              <div key={index} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors duration-200">
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{game.name}</p>
+                  <p className="text-xs text-gray-500">{game.players} players</p>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-medium text-green-600">{game.trend}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Gaming Events */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-4 border-b border-gray-100">
+          <h3 className="font-semibold text-gray-900">Upcoming Events</h3>
+        </div>
+        <div className="p-4">
+          <div className="space-y-3">
+            <div className="p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="text-lg">🏆</span>
+                <h4 className="font-medium text-gray-900">Valorant Tournament</h4>
+              </div>
+              <p className="text-xs text-gray-600">Tomorrow at 8:00 PM</p>
+              <p className="text-xs text-blue-600 font-medium mt-1">Prize: $10,000</p>
+            </div>
+            
+            <div className="p-3 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-100">
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="text-lg">🎮</span>
+                <h4 className="font-medium text-gray-900">Gaming Meetup</h4>
+              </div>
+              <p className="text-xs text-gray-600">This Weekend</p>
+              <p className="text-xs text-green-600 font-medium mt-1">Free Entry</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
