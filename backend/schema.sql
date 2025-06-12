@@ -99,6 +99,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `role` enum('member','moderator','admin') NOT NULL DEFAULT 'member',
   `status` enum('active','locked') NOT NULL DEFAULT 'active',
   `points` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `bio` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),

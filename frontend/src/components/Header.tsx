@@ -96,6 +96,12 @@ const Header: React.FC = () => {
                   <p className="font-semibold text-white">{currentUser?.nickname}</p>
                 </div>
                 <button 
+                  onClick={() => { setIsDropdownOpen(false); navigate('/profile'); }}
+                  className="w-full text-left block px-4 py-2 text-sm text-white hover:bg-gray-800/80 rounded-lg"
+                >
+                  Profile
+                </button>
+                <button 
                   onClick={handleLogout}
                   className="w-full text-left block px-4 py-2 text-sm text-red-400 hover:bg-gray-800/80 rounded-lg"
                 >
