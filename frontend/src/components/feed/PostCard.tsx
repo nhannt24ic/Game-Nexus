@@ -16,50 +16,44 @@ interface PostCardProps {
 
 const PostCard: React.FC<PostCardProps> = ({ post }) => {
   return (
-    <div className="bg-gray-800 rounded-lg p-4 shadow-lg text-white">
-      {/* Phần thông tin tác giả */}
-      <div className="flex items-center mb-4">
+    <div className="bg-gray-900/90 rounded-2xl p-6 shadow-2xl border border-gray-800 text-white mb-2">
+      {/* Thông tin tác giả */}
+      <div className="flex items-center mb-5">
         <Avatar user={{ 
             id: post.author_id, 
             nickname: post.author_nickname,
             avatar_url: post.author_avatar
-        }} className="w-12 h-12 mr-4" />
+        }} className="w-14 h-14 mr-5 ring-2 ring-cyber-purple" />
         <div>
-          <p className="font-bold">{post.author_nickname}</p>
-          <p className="text-sm text-gray-400">
-            {new Date(post.created_at).toLocaleString('vi-VN')}
-          </p>
+          <p className="font-bold text-lg text-cyber-purple drop-shadow">{post.author_nickname}</p>
+          <p className="text-sm text-gray-400">{new Date(post.created_at).toLocaleString('vi-VN')}</p>
         </div>
       </div>
-
-      {/* Phần nội dung bài viết */}
-      {post.content && <p className="mb-4 whitespace-pre-wrap">{post.content}</p>}
-
-      {/* Phần hiển thị nhiều ảnh (nếu có) */}
+      {/* Nội dung bài viết */}
+      {post.content && <p className="mb-5 whitespace-pre-wrap text-base text-gray-200">{post.content}</p>}
+      {/* Ảnh */}
       {post.images && post.images.length > 0 && (
-        <div className="grid grid-cols-2 gap-2 mb-4">
+        <div className="grid grid-cols-2 gap-3 mb-5">
           {post.images.map(image => (
             <img 
               key={image.id}
-              src={`http://localhost:3000${image.url}`} // Thêm domain của backend vào
+              src={`http://localhost:3000${image.url}`}
               alt={`Post image ${image.id}`}
-              className="rounded-lg object-cover w-full h-full"
+              className="rounded-xl object-cover w-full h-44 border border-gray-800 shadow-md"
             />
           ))}
         </div>
       )}
-
-      {/* Phần thống kê like/comment */}
-      <div className="flex justify-between items-center text-gray-400 border-b border-gray-700 pb-2 mb-2">
-        <span>{post.like_count} lượt thích</span>
-        <span>{post.comment_count} bình luận</span>
+      {/* Thống kê like/comment */}
+      <div className="flex justify-between items-center text-cyber-purple border-b border-gray-800 pb-2 mb-3">
+        <span className="font-semibold"><svg className="inline w-5 h-5 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 15a7 7 0 0014 0V7a7 7 0 00-14 0v8z"/></svg>{post.like_count} lượt thích</span>
+        <span className="font-semibold"><svg className="inline w-5 h-5 mr-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h12a2 2 0 012 2z"/></svg>{post.comment_count} bình luận</span>
       </div>
-      
-      {/* Phần các nút hành động (Like, Comment, Share) */}
-      <div className="flex justify-around items-center">
-        <button className="flex-1 text-center py-2 rounded-lg hover:bg-gray-700 transition-colors">Thích</button>
-        <button className="flex-1 text-center py-2 rounded-lg hover:bg-gray-700 transition-colors">Bình luận</button>
-        <button className="flex-1 text-center py-2 rounded-lg hover:bg-gray-700 transition-colors">Chia sẻ</button>
+      {/* Nút hành động */}
+      <div className="flex justify-around items-center gap-2">
+        <button className="flex-1 text-center py-2 rounded-xl font-semibold text-cyber-purple bg-gray-800/70 hover:bg-cyber-purple hover:text-white transition-colors">Thích</button>
+        <button className="flex-1 text-center py-2 rounded-xl font-semibold text-cyber-purple bg-gray-800/70 hover:bg-cyber-purple hover:text-white transition-colors">Bình luận</button>
+        <button className="flex-1 text-center py-2 rounded-xl font-semibold text-cyber-purple bg-gray-800/70 hover:bg-cyber-purple hover:text-white transition-colors">Chia sẻ</button>
       </div>
     </div>
   );

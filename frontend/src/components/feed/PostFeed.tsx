@@ -40,8 +40,8 @@ const PostFeed = () => {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-gray-800 p-4 rounded-lg text-gray-400">Tạo bài viết...</div>
+    <div className="space-y-8">
+      <div className="bg-gradient-to-r from-cyber-purple/30 to-cyber-blue/20 p-5 rounded-2xl shadow-lg border border-cyber-purple text-gray-300 font-semibold mb-2 cursor-pointer hover:scale-[1.01] transition-transform">Tạo bài viết...</div>
 
       {posts.map(post => (
         <PostCard key={post.id} post={post} />
