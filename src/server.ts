@@ -2,7 +2,7 @@
 import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import userRoutes from './routes/userRoutes'; // Tự động nhận file .ts
-
+import postRoutes from './routes/postRoutes';
 dotenv.config();
 
 const app: Express = express();
@@ -14,6 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/users', userRoutes);
+app.use('/api/posts', postRoutes);
 
 app.get('/', (req: Request, res: Response) => {
     res.send('Chào mừng đến với Game Nexus API! (Running on TypeScript)');
