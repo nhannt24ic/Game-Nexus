@@ -53,41 +53,56 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
     }
   }, [isOpen, initialType]);
 
+  // Hàm upload 1 file lên Cloudinary
+  const uploadToCloudinary = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', 'GameNexus'); // Thay bằng upload_preset của bạn
+    const res = await fetch('https://api.cloudinary.com/v1_1/dfsj2bcpi/image/upload', {
+      method: 'POST',
+      body: formData
+    });
+    const data = await res.json();
+    return data.secure_url;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!postContent.trim() && selectedImages.length === 0) return;
     setIsLoading(true);
-    if (onCreatePost) {
-      await onCreatePost(postContent, selectedImages);
-      setIsLoading(false);
-      setPostContent("");
+    try {
+      // Upload tất cả ảnh lên Cloudinary
+      const imageUrls: string[] = [];
+      for (const file of selectedImages) {
+        const url = await uploadToCloudinary(file);
+        imageUrls.push(url);
+      }
+      // Gửi post lên backend
+      const token = localStorage.getItem('token');
+      const res = await fetch('http://localhost:3000/api/posts', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          content: postContent,
+          images: imageUrls
+        })
+      });
+      if (!res.ok) throw new Error('Đăng bài thất bại!');
+      setPostContent('');
       setSelectedImages([]);
       setSelectedGame("");
       setShowEmojiPicker(false);
       setShowGameSelector(false);
       if (onPostCreated) onPostCreated();
       onClose();
-      return;
-    }
-
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Post submitted:", {
-        content: postContent,
-        images: selectedImages,
-        game: selectedGame,
-        type: initialType,
-      });
-
-      // Reset form
-      setPostContent("");
-      setSelectedImages([]);
-      setSelectedGame("");
-      setShowEmojiPicker(false);
-      setShowGameSelector(false);
+    } catch (err) {
+      alert('Đăng bài thất bại!');
+    } finally {
       setIsLoading(false);
-      onClose();
-    }, 1500);
+    }
   };
 
   const handleEmojiSelect = (emoji: string) => {
@@ -265,30 +280,19 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
               </div>
             )}
 
-            {/* Image Upload Component */}
-            <ImageUpload
-              images={selectedImages}
-              onImagesChange={setSelectedImages}
-              maxImages={4}
-            />
+            {/* Image Upload */}
+            <div className="mt-4">
+              <ImageUpload images={selectedImages} onImagesChange={setSelectedImages} maxImages={4} />
+              <ImageUpload.Trigger onImagesSelected={files => setSelectedImages(prev => [...prev, ...files])} disabled={selectedImages.length >= 4} className="mt-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 transition">
+                Thêm ảnh ({selectedImages.length}/4)
+              </ImageUpload.Trigger>
+            </div>
           </div>
 
           {/* Action Buttons */}
           <div className="px-6 py-4 border-t border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
-                {/* Photo Upload */}
-                <ImageUpload.Trigger
-                  onImagesSelected={(files) =>
-                    setSelectedImages((prev) => [...prev, ...files])
-                  }
-                  disabled={selectedImages.length >= 4}
-                  className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <span className="text-xl">📸</span>
-                  <span className="font-medium">Photo</span>
-                </ImageUpload.Trigger>
-
                 {/* Game Selection */}
                 <button
                   type="button"

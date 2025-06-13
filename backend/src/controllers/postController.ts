@@ -4,36 +4,29 @@ import db from "../config/db";
 import { JwtPayload } from "jsonwebtoken";
 import { RowDataPacket } from "mysql2";
 
-export const createPost = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  const userId = (req.user as JwtPayload).id;
-  const { content, tags } = req.body;
+export const createPost = async (req: Request, res: Response): Promise<void> => {
+    const userId = (req.user as JwtPayload).id;
+    const { content, tags } = req.body;
 
-  // Multer sẽ cung cấp một mảng các file trong `req.files`
-  const files = req.files as Express.Multer.File[];
+    // Multer sẽ cung cấp một mảng các file trong `req.files`
+    const files = req.files as Express.Multer.File[];
 
-  if (!content && (!files || files.length === 0)) {
-    res
-      .status(400)
-      .json({
-        message: "Bài viết phải có nội dung hoặc ít nhất một hình ảnh.",
-      });
-    return;
-  }
+    if (!content && (!files || files.length === 0)) {
+        res.status(400).json({ message: 'Bài viết phải có nội dung hoặc ít nhất một hình ảnh.' });
+        return;
+    }
 
   const connection = await db.getConnection();
 
   try {
     await connection.beginTransaction();
 
-    // 1. Thêm bài viết vào bảng `posts` (không còn cột image_url)
-    const [postResult] = await connection.query<any>(
-      "INSERT INTO posts (user_id, content, status) VALUES (?, ?, ?)",
-      [userId, content || null, "approved"]
-    );
-    const postId = postResult.insertId;
+        // 1. Thêm bài viết vào bảng `posts` (không còn cột image_url)
+        const [postResult] = await connection.query<any>(
+            'INSERT INTO posts (user_id, content, status) VALUES (?, ?, ?)',
+            [userId, content || null, 'approved']
+        );
+        const postId = postResult.insertId;
 
     // 2. Xử lý các tags (logic này giữ nguyên)
     if (tags && Array.isArray(tags) && tags.length > 0) {
@@ -59,36 +52,37 @@ export const createPost = async (
       }
     }
 
-    // 3. Xử lý nhiều file ảnh (logic mới)
-    const imageUrls: string[] = [];
-    if (files && files.length > 0) {
-      for (const file of files) {
-        const imageUrl = `/uploads/posts/${file.filename}`;
-        imageUrls.push(imageUrl);
+        // 3. Xử lý nhiều file ảnh (logic mới)
+        const imageUrls: string[] = [];
+        if (files && files.length > 0) {
+            for (const file of files) {
+                const imageUrl = `/uploads/posts/${file.filename}`;
+                imageUrls.push(imageUrl);
 
-        // Thêm đường dẫn ảnh vào bảng `post_images` mới
-        await connection.query(
-          "INSERT INTO post_images (post_id, image_url) VALUES (?, ?)",
-          [postId, imageUrl]
-        );
-      }
-    }
+                // Thêm đường dẫn ảnh vào bảng `post_images` mới
+                await connection.query(
+                    'INSERT INTO post_images (post_id, image_url) VALUES (?, ?)',
+                    [postId, imageUrl]
+                );
+            }
+        }
 
     // 4. Commit transaction
     await connection.commit();
 
-    res.status(201).json({
-      message: "Đăng bài thành công!",
-      postId: postId,
-      imageUrls: imageUrls, // Trả về một mảng các đường dẫn ảnh
-    });
-  } catch (error) {
-    await connection.rollback();
-    console.error("Lỗi khi tạo bài viết:", error);
-    res.status(500).json({ message: "Đã có lỗi xảy ra trên máy chủ." });
-  } finally {
-    connection.release();
-  }
+        res.status(201).json({
+            message: 'Đăng bài thành công!',
+            postId: postId,
+            imageUrls: imageUrls // Trả về một mảng các đường dẫn ảnh
+        });
+
+    } catch (error) {
+        await connection.rollback();
+        console.error('Lỗi khi tạo bài viết:', error);
+        res.status(500).json({ message: 'Đã có lỗi xảy ra trên máy chủ.' });
+    } finally {
+        connection.release();
+    }
 };
 
 export const toggleLikePost = async (
@@ -280,12 +274,12 @@ export const getAllPosts = async (
       [userId, limit, offset]
     ); // Truyền userId vào câu lệnh SQL
 
-    const processedPosts = posts.map((post) => ({
-      ...post,
-      // Chuyển đổi kết quả isLiked từ 0/1 sang true/false
-      isLiked: Boolean(post.isLiked),
-      images: JSON.parse(post.images),
-    }));
+        const processedPosts = posts.map(post => ({
+            ...post,
+            // Chuyển đổi kết quả isLiked từ 0/1 sang true/false
+            isLiked: Boolean(post.isLiked), 
+            images: JSON.parse(post.images)
+        }));
 
     res.status(200).json(processedPosts);
   } catch (error) {
