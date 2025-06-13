@@ -60,12 +60,10 @@ export const sendFriendRequest = async (
       "INSERT INTO friendships (user_one_id, user_two_id, status, action_user_id) VALUES (?, ?, ?, ?)",
       [senderId, receiverId, "pending", senderId]
     );
-    res
-      .status(201)
-      .json({
-        message: "Đã gửi lời mời kết bạn.",
-        friendshipId: result.insertId,
-      });
+    res.status(201).json({
+      message: "Đã gửi lời mời kết bạn.",
+      friendshipId: result.insertId,
+    });
   } catch (error) {
     console.error("Lỗi khi gửi lời mời kết bạn:", error);
     res.status(500).json({ message: "Lỗi máy chủ" });
@@ -120,11 +118,9 @@ export const respondToRequest = async (
     );
 
     if (requests.length === 0) {
-      res
-        .status(404)
-        .json({
-          message: "Không tìm thấy lời mời hoặc bạn không có quyền phản hồi.",
-        });
+      res.status(404).json({
+        message: "Không tìm thấy lời mời hoặc bạn không có quyền phản hồi.",
+      });
       await connection.rollback();
       return;
     }

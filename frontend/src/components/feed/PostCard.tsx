@@ -131,14 +131,31 @@ const PostCard: React.FC<PostCardProps> = ({
       </div>
 
       {/* Quick Comment Form */}
-      {/* <<< 5. Bọc khu vực bình luận trong một thẻ <form> */}
       <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
         <form
           onSubmit={handleCommentFormSubmit}
           className="flex items-center space-x-3"
         >
-          {/* TODO: Lấy thông tin avatar của người dùng đang đăng nhập để hiển thị ở đây */}
-          <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+          {/* Hiển thị avatar user đang đăng nhập */}
+          {(() => {
+            const userStr = localStorage.getItem('user');
+            let user = null;
+            if (userStr) {
+              try { user = JSON.parse(userStr); } catch {}
+            }
+            return user ? (
+              <Avatar
+                user={{
+                  id: user.id,
+                  nickname: user.nickname,
+                  avatar_url: user.avatar_url,
+                }}
+                className="w-8 h-8"
+              />
+            ) : (
+              <div className="w-8 h-8 bg-gray-300 rounded-full"></div>
+            );
+          })()}
           <input
             type="text"
             placeholder="Viết một bình luận..."
