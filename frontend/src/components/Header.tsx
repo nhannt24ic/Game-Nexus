@@ -55,8 +55,9 @@ const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* Navigation Icons */}
+          {/* Right side group (Icons & Avatar) */}
           <div className="flex items-center space-x-4">
+            {/* Navigation Icons */}
             <button className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors duration-200">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -67,36 +68,35 @@ const Header: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
             </button>
-          </div>
-
-          {/* Avatar & Dropdown */}
-          <div className="relative">
-            {currentUser ? (
-              <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="flex items-center space-x-2 focus:outline-none">
-                <Avatar user={currentUser} className="w-10 h-10 ring-2 ring-cyber-purple ring-offset-2 ring-offset-gray-900 transition-shadow" />
-              </button>
-            ) : (
-              <div className="w-10 h-10 bg-gray-700 rounded-full animate-pulse"></div>
-            )}
-            {isDropdownOpen && (
-              <div 
-                className="absolute right-0 mt-2 w-52 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl py-2 z-50 animate-fadeIn"
-                onMouseLeave={() => setIsDropdownOpen(false)}
-              >
-                <button 
-                  onClick={() => { setIsDropdownOpen(false); navigate('/profile'); }}
-                  className="w-full text-left block px-4 py-2 text-sm text-white hover:bg-gray-800/80 rounded-lg"
-                >
-                  Profile
+            {/* Avatar & Dropdown */}
+            <div className="relative">
+              {currentUser ? (
+                <button onClick={() => setIsDropdownOpen(!isDropdownOpen)} className="flex items-center space-x-2 focus:outline-none">
+                  <Avatar user={currentUser} className="w-10 h-10 ring-2 ring-cyber-purple ring-offset-2 ring-offset-gray-900 transition-shadow" />
                 </button>
-                <button 
-                  onClick={handleLogout}
-                  className="w-full text-left block px-4 py-2 text-sm text-red-400 hover:bg-gray-800/80 rounded-lg"
+              ) : (
+                <div className="w-10 h-10 bg-gray-700 rounded-full animate-pulse"></div>
+              )}
+              {isDropdownOpen && (
+                <div 
+                  className="absolute right-0 mt-2 w-52 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl py-2 z-50 animate-fadeIn"
+                  onMouseLeave={() => setIsDropdownOpen(false)}
                 >
-                  Đăng xuất
-                </button>
-              </div>
-            )}
+                  <button 
+                    onClick={() => { setIsDropdownOpen(false); navigate('/profile'); }}
+                    className="w-full text-left block px-4 py-2 text-sm text-white hover:bg-gray-800/80 rounded-lg"
+                  >
+                    Profile
+                  </button>
+                  <button 
+                    onClick={handleLogout}
+                    className="w-full text-left block px-4 py-2 text-sm text-red-400 hover:bg-gray-800/80 rounded-lg"
+                  >
+                    Đăng xuất
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
