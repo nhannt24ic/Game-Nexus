@@ -240,3 +240,24 @@ export const searchUsers = async (req: Request, res: Response): Promise<void> =>
         res.status(500).json({ message: 'Lỗi máy chủ' });
     }
 };
+
+export const resetPasswordByEmail = async (req: Request, res: Response): Promise<void> => {
+  const { email, newPassword } = req.body;
+  if (!email || !newPassword) {
+    res.status(400).json({ message: 'Thiếu thông tin' });
+    return;
+  }
+  try {
+    const [users] = await db.query<RowDataPacket[]>('SELECT id FROM users WHERE email = ?', [email]);
+    if (!users || users.length === 0) {
+      res.status(404).json({ message: 'Email không tồn tại' });
+      return;
+    }
+    const newHash = await bcrypt.hash(newPassword, 10);
+    await db.query('UPDATE users SET password_hash = ? WHERE email = ?', [newHash, email]);
+    res.status(200).json({ message: 'Đặt lại mật khẩu thành công' });
+  } catch (error) {
+    console.error('Lỗi reset mật khẩu:', error);
+    res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
+};

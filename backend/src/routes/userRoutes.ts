@@ -1,6 +1,6 @@
 // src/routes/userRoutes.ts
 import express from 'express';
-import { registerUser, loginUser, getTopActiveUsers, getCurrentUserProfile, updateAvatar, changePassword, updateProfile, searchUsers } from '../controllers/userController';
+import { registerUser, loginUser, getTopActiveUsers, getCurrentUserProfile, updateAvatar, changePassword, updateProfile, searchUsers, resetPasswordByEmail } from '../controllers/userController';
 import authMiddleware from '../middlewares/authMiddleware';
 
 const router = express.Router();
@@ -13,5 +13,6 @@ router.put('/update-avatar', authMiddleware, updateAvatar);
 router.put('/change-password', authMiddleware, changePassword);
 router.put('/update-profile', authMiddleware, updateProfile);
 router.get('/search', authMiddleware, searchUsers);
+router.post('/reset-password', resetPasswordByEmail);
 
 export default router;
