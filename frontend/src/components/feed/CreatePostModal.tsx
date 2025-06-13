@@ -17,7 +17,6 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   onClose,
   initialType = "general",
   onPostCreated,
-  onCreatePost,
 }) => {
   const [postContent, setPostContent] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
@@ -56,12 +55,15 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   // Hàm upload 1 file lên Cloudinary
   const uploadToCloudinary = async (file: File) => {
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('upload_preset', 'GameNexus'); // Thay bằng upload_preset của bạn
-    const res = await fetch('https://api.cloudinary.com/v1_1/dfsj2bcpi/image/upload', {
-      method: 'POST',
-      body: formData
-    });
+    formData.append("file", file);
+    formData.append("upload_preset", "GameNexus"); // Thay bằng upload_preset của bạn
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dfsj2bcpi/image/upload",
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
     const data = await res.json();
     return data.secure_url;
   };
@@ -78,20 +80,20 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
         imageUrls.push(url);
       }
       // Gửi post lên backend
-      const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:3000/api/posts', {
-        method: 'POST',
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:3000/api/posts", {
+        method: "POST",
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           content: postContent,
-          images: imageUrls
-        })
+          images: imageUrls,
+        }),
       });
-      if (!res.ok) throw new Error('Đăng bài thất bại!');
-      setPostContent('');
+      if (!res.ok) throw new Error("Đăng bài thất bại!");
+      setPostContent("");
       setSelectedImages([]);
       setSelectedGame("");
       setShowEmojiPicker(false);
@@ -99,7 +101,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
       if (onPostCreated) onPostCreated();
       onClose();
     } catch (err) {
-      alert('Đăng bài thất bại!');
+      alert("Đăng bài thất bại!");
     } finally {
       setIsLoading(false);
     }
@@ -282,10 +284,11 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
 
             {/* Image Upload */}
             <div className="mt-4">
-              <ImageUpload images={selectedImages} onImagesChange={setSelectedImages} maxImages={4} />
-              <ImageUpload.Trigger onImagesSelected={files => setSelectedImages(prev => [...prev, ...files])} disabled={selectedImages.length >= 4} className="mt-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg font-medium hover:bg-blue-200 transition">
-                Thêm ảnh ({selectedImages.length}/4)
-              </ImageUpload.Trigger>
+              <ImageUpload
+                images={selectedImages}
+                onImagesChange={setSelectedImages}
+                maxImages={4}
+              />
             </div>
           </div>
 
@@ -293,6 +296,28 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
           <div className="px-6 py-4 border-t border-gray-200">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
+                {/* Photo Button - giống HomePage, đặt ở góc dưới bên trái */}
+                <button
+                  type="button"
+                  onClick={() => document.getElementById('modal-photo-input')?.click()}
+                  className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                >
+                  <span className="text-xl">📸</span>
+                  <span className="font-medium">Photo</span>
+                </button>
+                {/* Hidden input để chọn ảnh */}
+                <input
+                  id="modal-photo-input"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={e => {
+                    if (e.target.files) {
+                      setSelectedImages(prev => [...prev, ...Array.from(e.target.files!)]);
+                    }
+                  }}
+                />
                 {/* Game Selection */}
                 <button
                   type="button"

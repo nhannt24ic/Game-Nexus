@@ -4,26 +4,33 @@ import db from "../config/db";
 import { JwtPayload } from "jsonwebtoken";
 import { RowDataPacket } from "mysql2";
 
-export const createPost = async (req: Request, res: Response): Promise<void> => {
-    const userId = (req.user as JwtPayload).id;
-    const { content, tags, images } = req.body;
+export const createPost = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  const userId = (req.user as JwtPayload).id;
+  const { content, tags, images } = req.body;
 
-    if (!content && (!images || images.length === 0)) {
-        res.status(400).json({ message: 'Bài viết phải có nội dung hoặc ít nhất một hình ảnh.' });
-        return;
-    }
+  if (!content && (!images || images.length === 0)) {
+    res
+      .status(400)
+      .json({
+        message: "Bài viết phải có nội dung hoặc ít nhất một hình ảnh.",
+      });
+    return;
+  }
 
     const connection = await db.getConnection();
 
     try {
         await connection.beginTransaction();
 
-        // 1. Thêm bài viết vào bảng `posts`
-        const [postResult] = await connection.query<any>(
-            'INSERT INTO posts (user_id, content, status) VALUES (?, ?, ?)',
-            [userId, content || null, 'approved']
-        );
-        const postId = postResult.insertId;
+    // 1. Thêm bài viết vào bảng `posts`
+    const [postResult] = await connection.query<any>(
+      "INSERT INTO posts (user_id, content, status) VALUES (?, ?, ?)",
+      [userId, content || null, "approved"]
+    );
+    const postId = postResult.insertId;
 
         // 2. Xử lý các tags (logic này giữ nguyên)
         if (tags && Array.isArray(tags) && tags.length > 0) {
@@ -49,31 +56,30 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
             }
         }
 
-        // 3. Lưu các URL ảnh vào post_images
-        if (images && Array.isArray(images)) {
-            for (const url of images) {
-                await connection.query(
-                    'INSERT INTO post_images (post_id, image_url) VALUES (?, ?)',
-                    [postId, url]
-                );
-            }
-        }
+    // 3. Lưu các URL ảnh vào post_images
+    if (images && Array.isArray(images)) {
+      for (const url of images) {
+        await connection.query(
+          "INSERT INTO post_images (post_id, image_url) VALUES (?, ?)",
+          [postId, url]
+        );
+      }
+    }
 
         // 4. Commit transaction
         await connection.commit();
 
-        res.status(201).json({
-            message: 'Đăng bài thành công!',
-            postId: postId
-        });
-
-    } catch (error) {
-        await connection.rollback();
-        console.error('Lỗi khi tạo bài viết:', error);
-        res.status(500).json({ message: 'Đã có lỗi xảy ra trên máy chủ.' });
-    } finally {
-        connection.release();
-    }
+    res.status(201).json({
+      message: "Đăng bài thành công!",
+      postId: postId,
+    });
+  } catch (error) {
+    await connection.rollback();
+    console.error("Lỗi khi tạo bài viết:", error);
+    res.status(500).json({ message: "Đã có lỗi xảy ra trên máy chủ." });
+  } finally {
+    connection.release();
+  }
 };
 
 export const toggleLikePost = async (
@@ -112,14 +118,14 @@ export const toggleLikePost = async (
 
         const authorId = posts[0].user_id;
 
-        // Ngăn người dùng tự "thích" bài viết của chính mình để tránh farm điểm
-        if (userId === authorId) {
-            res
-                .status(403)
-                .json({ message: "Bạn không thể thích bài viết của chính mình." });
-            await connection.rollback();
-            return;
-        }
+    // Ngăn người dùng tự "thích" bài viết của chính mình để tránh farm điểm
+    // if (userId === authorId) {
+    //   res
+    //     .status(403)
+    //     .json({ message: "Bạn không thể thích bài viết của chính mình." });
+    //   await connection.rollback();
+    //   return;
+    // }
 
         // 2. Kiểm tra xem người dùng này đã "thích" bài viết này trước đó chưa
         const [existingLikes] = await connection.query<any>(
@@ -265,18 +271,18 @@ export const getAllPosts = async (
             [userId, limit, offset]
         ); // Truyền userId vào câu lệnh SQL
 
-        const processedPosts = posts.map(post => ({
-            ...post,
-            // Chuyển đổi kết quả isLiked từ 0/1 sang true/false
-            isLiked: Boolean(post.isLiked),
-            images: (() => {
-                try {
-                    return JSON.parse(post.images);
-                } catch {
-                    return [];
-                }
-            })()
-        }));
+    const processedPosts = posts.map((post) => ({
+      ...post,
+      // Chuyển đổi kết quả isLiked từ 0/1 sang true/false
+      isLiked: Boolean(post.isLiked),
+      images: (() => {
+        try {
+          return JSON.parse(post.images);
+        } catch {
+          return [];
+        }
+      })(),
+    }));
 
         res.status(200).json(processedPosts);
     } catch (error) {
