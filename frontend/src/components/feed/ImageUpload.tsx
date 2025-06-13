@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef } from "react";
 
 interface ImageUploadProps {
   images: File[];
@@ -24,11 +24,15 @@ const ImageUpload: React.FC<ImageUploadProps> & {
 
   return (
     <div className="mt-4">
-      <div className={`grid gap-2 ${
-        images.length === 1 ? 'grid-cols-1' :
-        images.length === 2 ? 'grid-cols-2' :
-        'grid-cols-2'
-      }`}>
+      <div
+        className={`grid gap-2 ${
+          images.length === 1
+            ? "grid-cols-1"
+            : images.length === 2
+            ? "grid-cols-2"
+            : "grid-cols-2"
+        }`}
+      >
         {images.map((image, index) => (
           <div key={index} className="relative group">
             <img
@@ -42,8 +46,18 @@ const ImageUpload: React.FC<ImageUploadProps> & {
               onClick={() => removeImage(index)}
               className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-red-600"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
             {/* Image info overlay */}
@@ -62,11 +76,11 @@ const ImageUpload: React.FC<ImageUploadProps> & {
   );
 };
 
-const ImageUploadTrigger: React.FC<ImageUploadTriggerProps> = ({ 
-  onImagesSelected, 
-  disabled, 
-  className, 
-  children 
+const ImageUploadTrigger: React.FC<ImageUploadTriggerProps> = ({
+  onImagesSelected,
+  disabled,
+  className,
+  children,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,7 +90,7 @@ const ImageUploadTrigger: React.FC<ImageUploadTriggerProps> = ({
       onImagesSelected(files);
     }
     // Reset input
-    event.target.value = '';
+    event.target.value = "";
   };
 
   return (

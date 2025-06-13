@@ -1,44 +1,54 @@
-import React, { useState, useRef, useEffect } from 'react';
-import ImageUpload from './ImageUpload';
-import EmojiPicker from './EmojiPicker';
-import GameSelector from './GameSelector';
-import Avatar from '../common/Avatar';
+import React, { useState, useRef, useEffect } from "react";
+import ImageUpload from "./ImageUpload";
+import EmojiPicker from "./EmojiPicker";
+import GameSelector from "./GameSelector";
+import Avatar from "../common/Avatar";
 
 interface CreatePostModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialType?: 'general' | 'photo' | 'game' | 'stream';
+  initialType?: "general" | "photo" | "game" | "stream";
   onPostCreated?: () => void;
   onCreatePost?: (content: string, images: File[]) => void;
 }
 
-const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, initialType = 'general', onPostCreated, onCreatePost }) => {
-  const [postContent, setPostContent] = useState('');
+const CreatePostModal: React.FC<CreatePostModalProps> = ({
+  isOpen,
+  onClose,
+  initialType = "general",
+  onPostCreated,
+  onCreatePost,
+}) => {
+  const [postContent, setPostContent] = useState("");
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const [selectedGame, setSelectedGame] = useState('');
+  const [selectedGame, setSelectedGame] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGameSelector, setShowGameSelector] = useState(false);
-  const [user, setUser] = useState<{nickname: string, avatar_url: string|null} | null>(null);
+  const [user, setUser] = useState<{
+    nickname: string;
+    avatar_url: string | null;
+  } | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (!isOpen) return;
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) return;
-    fetch('http://localhost:3000/api/users/me', {
-      headers: { 'Authorization': `Bearer ${token}` }
+    fetch("http://localhost:3000/api/users/me", {
+      headers: { Authorization: `Bearer ${token}` },
     })
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (data) setUser({ nickname: data.nickname, avatar_url: data.avatar_url });
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data)
+          setUser({ nickname: data.nickname, avatar_url: data.avatar_url });
       });
   }, [isOpen]);
 
   useEffect(() => {
-    if (isOpen && initialType === 'photo') {
+    if (isOpen && initialType === "photo") {
       // Auto-focus on image upload for photo posts
-    } else if (isOpen && initialType === 'game') {
+    } else if (isOpen && initialType === "game") {
       setShowGameSelector(true);
     }
   }, [isOpen, initialType]);
@@ -50,29 +60,29 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, init
     if (onCreatePost) {
       await onCreatePost(postContent, selectedImages);
       setIsLoading(false);
-      setPostContent('');
+      setPostContent("");
       setSelectedImages([]);
-      setSelectedGame('');
+      setSelectedGame("");
       setShowEmojiPicker(false);
       setShowGameSelector(false);
       if (onPostCreated) onPostCreated();
       onClose();
       return;
     }
-    
+
     // Simulate API call
     setTimeout(() => {
-      console.log('Post submitted:', {
+      console.log("Post submitted:", {
         content: postContent,
         images: selectedImages,
         game: selectedGame,
-        type: initialType
+        type: initialType,
       });
-      
+
       // Reset form
-      setPostContent('');
+      setPostContent("");
       setSelectedImages([]);
-      setSelectedGame('');
+      setSelectedGame("");
       setShowEmojiPicker(false);
       setShowGameSelector(false);
       setIsLoading(false);
@@ -85,9 +95,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, init
     if (textarea) {
       const start = textarea.selectionStart;
       const end = textarea.selectionEnd;
-      const newContent = postContent.slice(0, start) + emoji + postContent.slice(end);
+      const newContent =
+        postContent.slice(0, start) + emoji + postContent.slice(end);
       setPostContent(newContent);
-      
+
       // Set cursor position after emoji
       setTimeout(() => {
         textarea.setSelectionRange(start + emoji.length, start + emoji.length);
@@ -110,16 +121,30 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, init
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-xl font-bold text-gray-900">
-            {initialType === 'photo' ? 'Share Photos' :
-             initialType === 'game' ? 'Share Gaming Moment' :
-             initialType === 'stream' ? 'Go Live' : 'Create Post'}
+            {initialType === "photo"
+              ? "Share Photos"
+              : initialType === "game"
+              ? "Share Gaming Moment"
+              : initialType === "stream"
+              ? "Go Live"
+              : "Create Post"}
           </h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
           >
-            <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg
+              className="w-6 h-6 text-gray-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
@@ -128,14 +153,23 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, init
         <div className="p-6 pb-4">
           <div className="flex items-center space-x-3">
             {user ? (
-              <Avatar user={{ id: 0, nickname: user.nickname, avatar_url: user.avatar_url }} className="w-12 h-12 border-2 border-cyber-purple" />
+              <Avatar
+                user={{
+                  id: 0,
+                  nickname: user.nickname,
+                  avatar_url: user.avatar_url,
+                }}
+                className="w-12 h-12 border-2 border-cyber-purple"
+              />
             ) : (
               <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold text-lg">?</span>
               </div>
             )}
             <div>
-              <h3 className="font-semibold text-gray-900">{user ? user.nickname : '...'}</h3>
+              <h3 className="font-semibold text-gray-900">
+                {user ? user.nickname : "..."}
+              </h3>
             </div>
           </div>
         </div>
@@ -149,18 +183,25 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, init
                 value={postContent}
                 onChange={(e) => setPostContent(e.target.value)}
                 placeholder={
-                  initialType === 'photo' ? "Share your gaming screenshots..." :
-                  initialType === 'game' ? "How's your gaming session going?" :
-                  initialType === 'stream' ? "Tell viewers what you're streaming..." :
-                  "What's happening in your gaming world?"
+                  initialType === "photo"
+                    ? "Share your gaming screenshots..."
+                    : initialType === "game"
+                    ? "How's your gaming session going?"
+                    : initialType === "stream"
+                    ? "Tell viewers what you're streaming..."
+                    : "What's happening in your gaming world?"
                 }
                 className="w-full h-32 resize-none border-0 text-lg placeholder-gray-500 focus:outline-none"
                 maxLength={500}
               />
-              
+
               {/* Character Count */}
               <div className="absolute bottom-2 right-2">
-                <span className={`text-sm ${postContent.length > 450 ? 'text-red-500' : 'text-gray-400'}`}>
+                <span
+                  className={`text-sm ${
+                    postContent.length > 450 ? "text-red-500" : "text-gray-400"
+                  }`}
+                >
                   {postContent.length}/500
                 </span>
               </div>
@@ -172,15 +213,27 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, init
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <span className="text-lg">🎮</span>
-                    <span className="font-medium text-blue-800">Playing {selectedGame}</span>
+                    <span className="font-medium text-blue-800">
+                      Playing {selectedGame}
+                    </span>
                   </div>
                   <button
                     type="button"
-                    onClick={() => setSelectedGame('')}
+                    onClick={() => setSelectedGame("")}
                     className="text-blue-600 hover:text-blue-800 transition-colors duration-200"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -188,11 +241,13 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, init
             )}
 
             {/* Stream Settings */}
-            {initialType === 'stream' && (
+            {initialType === "stream" && (
               <div className="mt-4 p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-lg">
                 <div className="flex items-center space-x-2 mb-3">
                   <span className="text-lg">📺</span>
-                  <span className="font-medium text-red-800">Live Stream Settings</span>
+                  <span className="font-medium text-red-800">
+                    Live Stream Settings
+                  </span>
                 </div>
                 <div className="space-y-2">
                   <input
@@ -224,7 +279,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, init
               <div className="flex items-center space-x-2">
                 {/* Photo Upload */}
                 <ImageUpload.Trigger
-                  onImagesSelected={(files) => setSelectedImages(prev => [...prev, ...files])}
+                  onImagesSelected={(files) =>
+                    setSelectedImages((prev) => [...prev, ...files])
+                  }
                   disabled={selectedImages.length >= 4}
                   className="flex items-center space-x-2 px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -265,23 +322,41 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, init
               {/* Post Button */}
               <button
                 type="submit"
-                disabled={(!postContent.trim() && selectedImages.length === 0) || isLoading}
+                disabled={
+                  (!postContent.trim() && selectedImages.length === 0) ||
+                  isLoading
+                }
                 className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold rounded-full hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center space-x-2"
               >
                 {isLoading ? (
                   <>
-                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <svg
+                      className="animate-spin w-4 h-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
                     </svg>
                     <span>
-                      {initialType === 'stream' ? 'Going Live...' : 'Posting...'}
+                      {initialType === "stream"
+                        ? "Going Live..."
+                        : "Posting..."}
                     </span>
                   </>
                 ) : (
-                  <span>
-                    {initialType === 'stream' ? 'Go Live' : 'Post'}
-                  </span>
+                  <span>{initialType === "stream" ? "Go Live" : "Post"}</span>
                 )}
               </button>
             </div>

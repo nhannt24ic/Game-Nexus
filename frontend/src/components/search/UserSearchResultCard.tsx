@@ -1,84 +1,65 @@
 // src/components/search/UserSearchResultCard.tsx
-import React from "react";
-import Avatar from "../common/Avatar";
-import { type UserSearchResult } from "../../types";
-import { useNotifier } from "../../context/NotificationContext";
+import React from 'react';
+import Avatar from '../common/Avatar';
+import { type UserSearchResult } from '../../types';
+import { jwtDecode } from 'jwt-decode';
 
 interface UserCardProps {
-  user: UserSearchResult;
+    user: UserSearchResult;
+    onAction: (targetUserId: number, friendshipId: number | null, action: 'add' | 'cancel' | 'accept' | 'decline') => void;
 }
 
-const UserSearchResultCard: React.FC<UserCardProps> = ({ user }) => {
-  const addNotification = useNotifier();
-
-  const handleAddFriend = async () => {
-    const token = localStorage.getItem("token");
+const getCurrentUserId = (): number | null => {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/friends/request/${user.id}`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${token}` },
+        const decoded: { id: number } = jwtDecode(token);
+        return decoded.id;
+    } catch (error) {
+        return null;
+    }
+};
+
+const UserSearchResultCard: React.FC<UserCardProps> = ({ user, onAction }) => {
+    const currentUserId = getCurrentUserId();
+
+    const renderFriendshipButton = () => {
+        const { id, friendship_id, friendship_status, action_user_id } = user;
+
+        if (friendship_status === 'accepted') {
+            return <span className="text-sm text-green-500 font-semibold">Bạn bè</span>;
         }
-      );
-      const data = await response.json();
-      if (!response.ok) {
-        // Ném ra một Error với message từ API
-        throw new Error(data.message || "Hành động thất bại");
-      }
-      addNotification("Đã gửi lời mời kết bạn!", "success");
-      // TODO: Cập nhật trạng thái của nút bấm sau khi gửi thành công
-    } catch (err) {
-      // --- SỬA LỖI Ở ĐÂY ---
-      // Kiểm tra kiểu của lỗi trước khi sử dụng
-      if (err instanceof Error) {
-        addNotification(err.message, "error");
-      } else {
-        addNotification("Một lỗi không mong muốn đã xảy ra.", "error");
-      }
-    }
-  };
 
-  const renderFriendshipButton = () => {
-    switch (user.friendship_status) {
-      case "accepted":
-        return (
-          <span className="text-sm text-green-500 font-semibold">Bạn bè</span>
-        );
-      case "pending":
-        return (
-          <span className="text-sm text-yellow-500 font-semibold">
-            Đang chờ
-          </span>
-        );
-      default:
-        return (
-          <button
-            onClick={handleAddFriend}
-            className="px-4 py-1 bg-purple-600 text-white text-sm font-semibold rounded-full hover:bg-purple-700 transition"
-          >
-            Kết bạn
-          </button>
-        );
-    }
-  };
+        if (friendship_status === 'pending') {
+            if (action_user_id === currentUserId) {
+                // Mình là người gửi lời mời -> Nút Hủy
+                return <button onClick={() => onAction(id, null, 'cancel')} className="px-3 py-1 bg-red-500 text-white text-xs font-semibold rounded-full hover:bg-red-600">Hủy lời mời</button>;
+            } else {
+                // Mình là người nhận lời mời -> Nút Đồng ý/Từ chối
+                return (
+                    <div className="flex space-x-2">
+                        <button onClick={() => onAction(id, friendship_id, 'accept')} className="px-3 py-1 bg-blue-500 text-white text-xs font-semibold rounded-full hover:bg-blue-600">Đồng ý</button>
+                        <button onClick={() => onAction(id, friendship_id, 'decline')} className="px-3 py-1 bg-gray-300 text-xs font-semibold rounded-full hover:bg-gray-400">Từ chối</button>
+                    </div>
+                );
+            }
+        }
+        
+        // Mặc định, nếu không có quan hệ gì -> Nút Kết bạn
+        return <button onClick={() => onAction(id, null, 'add')} className="px-4 py-1 bg-purple-600 text-white text-sm font-semibold rounded-full hover:bg-purple-700">Kết bạn</button>;
+    };
 
-  return (
-    <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
-      <div className="flex items-center">
-        <Avatar
-          user={{
-            id: user.id,
-            nickname: user.nickname,
-            avatar_url: user.avatar_url,
-          }}
-          className="w-12 h-12"
-        />
-        <p className="ml-4 font-bold text-gray-800">{user.nickname}</p>
-      </div>
-      {renderFriendshipButton()}
-    </div>
-  );
+    return (
+        <div className="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+            <div className="flex items-center">
+                <Avatar user={{ id: user.id, nickname: user.nickname, avatar_url: user.avatar_url }} className="w-12 h-12" />
+                <p className="ml-4 font-bold text-gray-800">{user.nickname}</p>
+            </div>
+            <div>
+                {renderFriendshipButton()}
+            </div>
+        </div>
+    );
 };
 
 export default UserSearchResultCard;

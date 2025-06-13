@@ -24,11 +24,20 @@ export interface User {
 export interface Notification {
   id: number;
   message: string;
-  type: 'success' | 'error' | 'info'; // Các loại thông báo
+  type: "success" | "error" | "info"; // Các loại thông báo
 }
 export interface UserSearchResult {
   id: number;
   nickname: string;
   avatar_url: string | null;
-  friendship_status: 'pending' | 'accepted' | null;
+  friendship_id: number | null;
+  friendship_status: "pending" | "accepted" | null;
+  action_user_id: number | null;
+}
+
+export interface IncomingRequest {
+  id: number; // id của lời mời trong bảng friendships
+  sender_id: number;
+  nickname: string;
+  avatar_url: string | null;
 }

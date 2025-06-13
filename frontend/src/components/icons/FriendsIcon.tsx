@@ -1,9 +1,9 @@
 // src/components/icons/FriendsIcon.tsx
 
-import React from 'react';
+import React from "react";
 // 1. Import một icon cụ thể từ thư viện react-icons
 // Ví dụ này dùng icon từ bộ Font Awesome (Fa)
-import { FaUserFriends } from 'react-icons/fa';
+import { FaUserFriends } from "react-icons/fa";
 
 // 2. Component giờ chỉ cần trả về icon đã import
 const FriendsIcon: React.FC<{ className?: string }> = ({ className }) => {

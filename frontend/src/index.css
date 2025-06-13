@@ -95,6 +95,30 @@
   background: #a8a8a8;
 }
 
+/* Thêm custom scrollbar cho sidebar */
+.left-sidebar-scroll,
+.right-sidebar-scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #a78bfa #f1f1f1;
+  max-height: calc(100vh - 64px); /* Trừ chiều cao header nếu cần */
+}
+
+/* Scrollbar cho Chrome */
+.left-sidebar-scroll::-webkit-scrollbar,
+.right-sidebar-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.left-sidebar-scroll::-webkit-scrollbar-thumb,
+.right-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: #a78bfa;
+  border-radius: 6px;
+}
+.left-sidebar-scroll::-webkit-scrollbar-track,
+.right-sidebar-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
 /* Focus styles */
 .focus\:ring-2:focus {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);

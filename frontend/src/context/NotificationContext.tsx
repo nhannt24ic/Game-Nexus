@@ -1,29 +1,33 @@
 // src/context/NotificationContext.tsx
-import React, { createContext, useState, useContext, ReactNode } from 'react';
-import { type Notification } from '../types';
+import React, { createContext, useState, useContext, ReactNode } from "react";
+import { type Notification } from "../types";
 
 // Định nghĩa kiểu cho Context
 interface NotificationContextType {
-  addNotification: (message: string, type: Notification['type']) => void;
+  addNotification: (message: string, type: Notification["type"]) => void;
 }
 
 // Tạo Context
-const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
+const NotificationContext = createContext<NotificationContextType | undefined>(
+  undefined
+);
 
 // Tạo Provider Component
-export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const addNotification = (message: string, type: Notification['type']) => {
-    const id = Date.now(); // Dùng timestamp làm ID duy nhất
+  const addNotification = (message: string, type: Notification["type"]) => {
+    const id = Date.now() + Math.random();
     const newNotification: Notification = { id, message, type };
 
     // Thêm thông báo mới vào danh sách
-    setNotifications(prev => [...prev, newNotification]);
+    setNotifications((prev) => [...prev, newNotification]);
 
     // Tự động xóa thông báo sau 5 giây
     setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n.id !== id));
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
     }, 5000);
   };
 
@@ -40,7 +44,9 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 export const useNotifier = () => {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error('useNotifier phải được sử dụng bên trong NotificationProvider');
+    throw new Error(
+      "useNotifier phải được sử dụng bên trong NotificationProvider"
+    );
   }
   return context.addNotification;
 };
@@ -49,7 +55,9 @@ export const useNotifier = () => {
 interface NotificationContainerProps {
   notifications: Notification[];
 }
-const NotificationContainer: React.FC<NotificationContainerProps> = ({ notifications }) => {
+const NotificationContainer: React.FC<NotificationContainerProps> = ({
+  notifications,
+}) => {
   return (
     <div className="fixed top-20 right-4 z-[100] space-y-3 w-80">
       {notifications.map((notification) => (
@@ -61,7 +69,8 @@ const NotificationContainer: React.FC<NotificationContainerProps> = ({ notificat
 
 // Component cho một toast đơn lẻ
 const Toast: React.FC<{ notification: Notification }> = ({ notification }) => {
-  const baseClasses = "p-4 rounded-lg shadow-xl text-white font-semibold animate-slide-in-right";
+  const baseClasses =
+    "p-4 rounded-lg shadow-xl text-white font-semibold animate-slide-in-right";
   const typeClasses = {
     success: "bg-green-500",
     error: "bg-red-500",

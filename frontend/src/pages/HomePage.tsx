@@ -1,65 +1,69 @@
 // src/pages/HomePage.tsx
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
-import LeftSidebar from '../components/layout/LeftSidebar';
-import RightSidebar from '../components/layout/RightSidebar';
-import PostFeed from '../components/feed/PostFeed';
-import CreatePostModal from '../components/feed/CreatePostModal';
-import Avatar from '../components/common/Avatar'; // Đúng path
-import type { User } from '../types';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import Header from "../components/Header";
+import LeftSidebar from "../components/layout/LeftSidebar";
+import RightSidebar from "../components/layout/RightSidebar";
+import PostFeed from "../components/feed/PostFeed";
+import CreatePostModal from "../components/feed/CreatePostModal";
+import Avatar from "../components/common/Avatar"; // Đúng path
+import type { User } from "../types";
 
 const HomePage: React.FC = () => {
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
-  const [activePostType, setActivePostType] = useState<'general' | 'photo' | 'game' | 'stream'>('general');
+  const [activePostType, setActivePostType] = useState<
+    "general" | "photo" | "game" | "stream"
+  >("general");
   const [reloadFeed, setReloadFeed] = useState(0);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
-    fetch('http://localhost:3000/api/users/me', {
-      headers: { 'Authorization': `Bearer ${token}` }
+    fetch("http://localhost:3000/api/users/me", {
+      headers: { Authorization: `Bearer ${token}` },
     })
-      .then(res => res.ok ? res.json() : null)
-      .then(data => {
-        if (!data) navigate('/login');
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (!data) navigate("/login");
         else setCurrentUser(data);
       })
-      .catch(() => navigate('/login'));
+      .catch(() => navigate("/login"));
   }, [navigate]);
 
-  const handleOpenCreatePost = (type: 'general' | 'photo' | 'game' | 'stream' = 'general') => {
+  const handleOpenCreatePost = (
+    type: "general" | "photo" | "game" | "stream" = "general"
+  ) => {
     setActivePostType(type);
     setIsCreatePostModalOpen(true);
   };
 
   // Thêm hàm handleCreatePost để gọi API backend
   const handleCreatePost = async (content: string, images: File[]) => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (!token) return;
     const formData = new FormData();
-    formData.append('content', content);
-    images.forEach((img) => formData.append('images', img));
+    formData.append("content", content);
+    images.forEach((img) => formData.append("images", img));
     try {
-      const res = await fetch('http://localhost:3000/api/posts', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
+      const res = await fetch("http://localhost:3000/api/posts", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
       });
       if (res.ok) {
         // Reload lại feed sau khi đăng bài thành công
         setReloadFeed((prev) => prev + 1);
       } else {
         // Xử lý lỗi nếu cần
-        alert('Đăng bài thất bại!');
+        alert("Đăng bài thất bại!");
       }
     } catch {
-      alert('Lỗi kết nối backend!');
+      alert("Lỗi kết nối backend!");
     }
   };
 
@@ -85,7 +89,9 @@ const HomePage: React.FC = () => {
                   <span className="text-white font-bold text-lg">🎮</span>
                 </div>
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Welcome to GameNexus</h2>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Welcome to GameNexus
+                  </h2>
                   <p className="text-gray-600">Connect with gamers worldwide</p>
                 </div>
               </div>
@@ -95,18 +101,15 @@ const HomePage: React.FC = () => {
               <div className="flex items-center space-x-4">
                 {/* Sử dụng component Avatar với dữ liệu thực tế */}
                 {currentUser ? (
-                  <Avatar
-                    user={currentUser}
-                    className="w-10 h-10"
-                  />
+                  <Avatar user={currentUser} className="w-10 h-10" />
                 ) : (
                   <div className="w-10 h-10 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
                     <span className="text-white font-bold">?</span>
                   </div>
                 )}
                 <div className="flex-1">
-                  <button 
-                    onClick={() => handleOpenCreatePost('general')}
+                  <button
+                    onClick={() => handleOpenCreatePost("general")}
                     className="w-full text-left px-4 py-3 bg-gray-50 hover:bg-gray-100 rounded-full text-gray-500 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     What's happening in your gaming world?
@@ -114,22 +117,22 @@ const HomePage: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
-                <button 
-                  onClick={() => handleOpenCreatePost('photo')}
+                <button
+                  onClick={() => handleOpenCreatePost("photo")}
                   className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <span className="text-xl">📸</span>
                   <span className="font-medium">Photo</span>
                 </button>
-                <button 
-                  onClick={() => handleOpenCreatePost('game')}
+                <button
+                  onClick={() => handleOpenCreatePost("game")}
                   className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <span className="text-xl">🎮</span>
                   <span className="font-medium">Game</span>
                 </button>
-                <button 
-                  onClick={() => handleOpenCreatePost('stream')}
+                <button
+                  onClick={() => handleOpenCreatePost("stream")}
                   className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <span className="text-xl">📺</span>
@@ -139,7 +142,9 @@ const HomePage: React.FC = () => {
             </div>
             {/* Stories Section */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Gaming Stories</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Gaming Stories
+              </h3>
               <div className="flex space-x-4 overflow-x-auto pb-2">
                 {/* Add Story */}
                 <div className="flex-shrink-0">
@@ -147,7 +152,9 @@ const HomePage: React.FC = () => {
                     <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mb-2">
                       <span className="text-white text-lg">+</span>
                     </div>
-                    <span className="text-xs text-gray-600 text-center">Add Story</span>
+                    <span className="text-xs text-gray-600 text-center">
+                      Add Story
+                    </span>
                   </div>
                 </div>
                 {/* Sample Stories */}
@@ -156,7 +163,9 @@ const HomePage: React.FC = () => {
                     <div className="w-20 h-28 bg-gradient-to-b from-purple-400 to-blue-500 rounded-xl relative cursor-pointer hover:shadow-md transition-shadow duration-200">
                       <div className="absolute top-2 left-2 w-6 h-6 bg-white rounded-full border-2 border-blue-500"></div>
                       <div className="absolute bottom-2 left-2 right-2">
-                        <span className="text-white text-xs font-medium">User {story}</span>
+                        <span className="text-white text-xs font-medium">
+                          User {story}
+                        </span>
                       </div>
                     </div>
                   </div>

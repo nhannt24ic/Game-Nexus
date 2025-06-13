@@ -9,14 +9,32 @@ CREATE TABLE `comments` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-CREATE TABLE `friendships` (
-  `user_one_id` int(10) UNSIGNED NOT NULL,
-  `user_two_id` int(10) UNSIGNED NOT NULL,
-  `status` enum('pending','accepted','blocked') NOT NULL,
-  `action_user_id` int(10) UNSIGNED NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+-- Thay thế câu lệnh tạo bảng friendships cũ bằng câu lệnh này
+CREATE TABLE IF NOT EXISTS `friendships` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_one_id` INT UNSIGNED NOT NULL,
+  `user_two_id` INT UNSIGNED NOT NULL,
+  `status` ENUM('pending', 'accepted', 'blocked') NOT NULL,
+  `action_user_id` INT UNSIGNED NOT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE INDEX `unique_friendship_pair_idx` (`user_one_id` ASC, `user_two_id` ASC),
+  INDEX `fk_friendships_users2_idx` (`user_two_id` ASC),
+  INDEX `fk_friendships_action_user_idx` (`action_user_id` ASC),
+  CONSTRAINT `fk_friendships_users1`
+    FOREIGN KEY (`user_one_id`)
+    REFERENCES `users` (`id`)
+    ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `fk_friendships_users2`
+    FOREIGN KEY (`user_two_id`)
+    REFERENCES `users` (`id`)
+    ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT `fk_friendships_action_user`
+    FOREIGN KEY (`action_user_id`)
+    REFERENCES `users` (`id`)
+    ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE = InnoDB;
 
 CREATE TABLE `likes` (
   `id` int(10) UNSIGNED NOT NULL,
@@ -151,11 +169,6 @@ ALTER TABLE `comments`
   ADD CONSTRAINT `fk_comments_parent_comment` FOREIGN KEY (`parent_comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   ADD CONSTRAINT `fk_comments_posts` FOREIGN KEY (`post_id`) REFERENCES `posts` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   ADD CONSTRAINT `fk_comments_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
-ALTER TABLE `friendships`
-  ADD CONSTRAINT `fk_friendships_action_user` FOREIGN KEY (`action_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  ADD CONSTRAINT `fk_friendships_users1` FOREIGN KEY (`user_one_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
-  ADD CONSTRAINT `fk_friendships_users2` FOREIGN KEY (`user_two_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
 
 ALTER TABLE `likes`
   ADD CONSTRAINT `fk_likes_comments` FOREIGN KEY (`comment_id`) REFERENCES `comments` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
