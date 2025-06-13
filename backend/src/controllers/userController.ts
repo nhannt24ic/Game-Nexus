@@ -160,3 +160,42 @@ export const updateAvatar = async (req: Request, res: Response): Promise<void> =
     res.status(500).json({ message: 'Lỗi máy chủ' });
   }
 };
+
+export const changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id || req.user?.id;
+    const { oldPassword, newPassword } = req.body;
+    if (!oldPassword || !newPassword) return res.status(400).json({ message: 'Thiếu thông tin' });
+
+    // Lấy password_hash hiện tại
+    const [users] = await db.query('SELECT password_hash FROM users WHERE id = ?', [userId]);
+    if (!users || users.length === 0) return res.status(404).json({ message: 'Không tìm thấy user' });
+
+    const valid = await bcrypt.compare(oldPassword, users[0].password_hash);
+    if (!valid) return res.status(401).json({ message: 'Mật khẩu cũ không đúng' });
+
+    // Hash mật khẩu mới và cập nhật
+    const newHash = await bcrypt.hash(newPassword, 10);
+    await db.query('UPDATE users SET password_hash = ? WHERE id = ?', [newHash, userId]);
+    res.status(200).json({ message: 'Đổi mật khẩu thành công' });
+  } catch (error) {
+    console.error('Lỗi đổi mật khẩu:', error);
+    res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
+};
+
+export const updateProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req.user as JwtPayload).id;
+    const { email, bio } = req.body;
+    if (!email) {
+      res.status(400).json({ message: 'Thiếu email' });
+      return;
+    }
+    await db.query('UPDATE users SET email = ?, bio = ? WHERE id = ?', [email, bio, userId]);
+    res.status(200).json({ message: 'Cập nhật thông tin thành công' });
+  } catch (error) {
+    console.error('Lỗi update profile:', error);
+    res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
+};
