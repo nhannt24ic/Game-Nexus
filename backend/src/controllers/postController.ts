@@ -6,12 +6,9 @@ import { RowDataPacket } from 'mysql2';
 
 export const createPost = async (req: Request, res: Response): Promise<void> => {
     const userId = (req.user as JwtPayload).id;
-    const { content, tags } = req.body;
+    const { content, tags, images } = req.body;
 
-    // Multer sẽ cung cấp một mảng các file trong `req.files`
-    const files = req.files as Express.Multer.File[];
-
-    if (!content && (!files || files.length === 0)) {
+    if (!content && (!images || images.length === 0)) {
         res.status(400).json({ message: 'Bài viết phải có nội dung hoặc ít nhất một hình ảnh.' });
         return;
     }
@@ -21,7 +18,7 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
     try {
         await connection.beginTransaction();
 
-        // 1. Thêm bài viết vào bảng `posts` (không còn cột image_url)
+        // 1. Thêm bài viết vào bảng `posts`
         const [postResult] = await connection.query<any>(
             'INSERT INTO posts (user_id, content, status) VALUES (?, ?, ?)',
             [userId, content || null, 'approved']
@@ -43,17 +40,12 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
             }
         }
 
-        // 3. Xử lý nhiều file ảnh (logic mới)
-        const imageUrls: string[] = [];
-        if (files && files.length > 0) {
-            for (const file of files) {
-                const imageUrl = `/uploads/posts/${file.filename}`;
-                imageUrls.push(imageUrl);
-
-                // Thêm đường dẫn ảnh vào bảng `post_images` mới
+        // 3. Lưu các URL ảnh vào post_images
+        if (images && Array.isArray(images)) {
+            for (const url of images) {
                 await connection.query(
                     'INSERT INTO post_images (post_id, image_url) VALUES (?, ?)',
-                    [postId, imageUrl]
+                    [postId, url]
                 );
             }
         }
@@ -63,8 +55,7 @@ export const createPost = async (req: Request, res: Response): Promise<void> => 
 
         res.status(201).json({
             message: 'Đăng bài thành công!',
-            postId: postId,
-            imageUrls: imageUrls // Trả về một mảng các đường dẫn ảnh
+            postId: postId
         });
 
     } catch (error) {
@@ -250,8 +241,14 @@ export const getAllPosts = async (req: Request, res: Response): Promise<void> =>
         const processedPosts = posts.map(post => ({
             ...post,
             // Chuyển đổi kết quả isLiked từ 0/1 sang true/false
-            isLiked: Boolean(post.isLiked), 
-            images: JSON.parse(post.images)
+            isLiked: Boolean(post.isLiked),
+            images: (() => {
+              try {
+                return JSON.parse(post.images);
+              } catch {
+                return [];
+              }
+            })()
         }));
 
         res.status(200).json(processedPosts);

@@ -62,7 +62,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onLike, onCommentSubmit, onSh
           {post.images.map((image) => (
             <div key={image.id} className="relative group cursor-pointer">
               <img
-                src={`http://localhost:3000${image.url}`}
+                src={image.url}
                 alt={`Post image ${image.id}`}
                 className="object-cover w-full h-full"
               />
