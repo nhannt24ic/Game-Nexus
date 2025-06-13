@@ -4,6 +4,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import AuthPage from './pages/AuthPage';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
+import SearchResultsPage from './pages/SearchResultsPage';
 
 // Component đơn giản để kiểm tra xem người dùng đã đăng nhập chưa
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -35,6 +36,10 @@ function App() {
             <ProfilePage />
           </ProtectedRoute>
         } 
+      />
+      <Route 
+        path="/search" 
+        element={<ProtectedRoute><SearchResultsPage /></ProtectedRoute>} 
       />
     </Routes>
   );
