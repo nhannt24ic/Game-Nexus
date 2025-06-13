@@ -199,3 +199,44 @@ export const updateProfile = async (req: Request, res: Response): Promise<void> 
     res.status(500).json({ message: 'Lỗi máy chủ' });
   }
 };
+
+export const searchUsers = async (req: Request, res: Response): Promise<void> => {
+    const currentUserId = (req.user as JwtPayload).id;
+    const query = req.query.q as string;
+
+    if (!query) {
+        res.json([]);
+        return;
+    }
+
+    // Tìm kiếm cả username và nickname, ưu tiên trùng khớp hoàn toàn trước
+    // sau đó đến gần giống, và loại trừ chính mình.
+    try {
+        const [users] = await db.query<RowDataPacket[]>(`
+            SELECT 
+                u.id, 
+                u.nickname, 
+                u.avatar_url,
+                f.status AS friendship_status
+            FROM users u
+            LEFT JOIN friendships f ON 
+                (f.user_one_id = u.id AND f.user_two_id = ?) OR 
+                (f.user_one_id = ? AND f.user_two_id = u.id)
+            WHERE 
+                (u.nickname LIKE ? OR u.username LIKE ?) AND u.id != ?
+            ORDER BY
+                CASE
+                    WHEN u.nickname = ? THEN 0
+                    WHEN u.username = ? THEN 1
+                    ELSE 2
+                END,
+                u.nickname
+            LIMIT 20;
+        `, [currentUserId, currentUserId, `%${query}%`, `%${query}%`, currentUserId, query, query]);
+
+        res.status(200).json(users);
+    } catch (error) {
+        console.error('Lỗi khi tìm kiếm người dùng:', error);
+        res.status(500).json({ message: 'Lỗi máy chủ' });
+    }
+};

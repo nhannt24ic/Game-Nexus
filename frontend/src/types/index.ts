@@ -26,3 +26,9 @@ export interface Notification {
   message: string;
   type: 'success' | 'error' | 'info'; // Các loại thông báo
 }
+export interface UserSearchResult {
+  id: number;
+  nickname: string;
+  avatar_url: string | null;
+  friendship_status: 'pending' | 'accepted' | null;
+}
