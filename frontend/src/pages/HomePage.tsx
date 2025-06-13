@@ -6,16 +6,33 @@ import LeftSidebar from "../components/layout/LeftSidebar";
 import RightSidebar from "../components/layout/RightSidebar";
 import PostFeed from "../components/feed/PostFeed";
 import CreatePostModal from "../components/feed/CreatePostModal";
+import CreateStoryModal from "../components/feed/CreateStoryModal";
+import StoryCard from "../components/feed/StoryCard";
+import StoryViewModal from "../components/feed/StoryViewModal";
 import Avatar from "../components/common/Avatar"; // Đúng path
 import type { User } from "../types";
 
+interface Story {
+  id: number;
+  user_id: number;
+  content: string | null;
+  image_url: string | null;
+  game: string | null;
+  created_at: string;
+  nickname: string;
+  avatar_url: string | null;
+}
+
 const HomePage: React.FC = () => {
   const [isCreatePostModalOpen, setIsCreatePostModalOpen] = useState(false);
+  const [isCreateStoryModalOpen, setIsCreateStoryModalOpen] = useState(false);
+  const [selectedStory, setSelectedStory] = useState<Story | null>(null);
   const [activePostType, setActivePostType] = useState<
     "general" | "photo" | "game" | "stream"
   >("general");
   const [reloadFeed, setReloadFeed] = useState(0);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [stories, setStories] = useState<Story[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -33,7 +50,22 @@ const HomePage: React.FC = () => {
         else setCurrentUser(data);
       })
       .catch(() => navigate("/login"));
-  }, [navigate]);
+
+    const fetchStories = async () => {
+      try {
+        const storyRes = await fetch("http://localhost:3000/api/stories", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (storyRes.ok) {
+          const storyData: Story[] = await storyRes.json();
+          setStories(storyData);
+        }
+      } catch (error) {
+        console.error("Lỗi khi lấy stories:", error);
+      }
+    };
+    fetchStories();
+  }, [navigate, reloadFeed]);
 
   const handleOpenCreatePost = (
     type: "general" | "photo" | "game" | "stream" = "general"
@@ -42,7 +74,11 @@ const HomePage: React.FC = () => {
     setIsCreatePostModalOpen(true);
   };
 
-  // Thêm hàm handleCreatePost để gọi API backend
+  const handleStoryCreated = () => {
+    setReloadFeed(prev => prev + 1);
+    setIsCreateStoryModalOpen(false);
+  };
+
   const handleCreatePost = async (content: string, images: File[]) => {
     const token = localStorage.getItem("token");
     if (!token) return;
@@ -56,15 +92,17 @@ const HomePage: React.FC = () => {
         body: formData,
       });
       if (res.ok) {
-        // Reload lại feed sau khi đăng bài thành công
         setReloadFeed((prev) => prev + 1);
       } else {
-        // Xử lý lỗi nếu cần
         alert("Đăng bài thất bại!");
       }
     } catch {
       alert("Lỗi kết nối backend!");
     }
+  };
+
+  const handleStoryClick = (story: Story) => {
+    setSelectedStory(story);
   };
 
   return (
@@ -148,27 +186,25 @@ const HomePage: React.FC = () => {
               <div className="flex space-x-4 overflow-x-auto pb-2">
                 {/* Add Story */}
                 <div className="flex-shrink-0">
-                  <div className="w-20 h-28 bg-gradient-to-b from-gray-100 to-gray-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:shadow-md transition-shadow duration-200">
+                  <button 
+                    onClick={() => setIsCreateStoryModalOpen(true)}
+                    className="w-20 h-28 bg-gradient-to-b from-gray-100 to-gray-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:shadow-md transition-shadow duration-200"
+                  >
                     <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mb-2">
                       <span className="text-white text-lg">+</span>
                     </div>
                     <span className="text-xs text-gray-600 text-center">
                       Add Story
                     </span>
-                  </div>
+                  </button>
                 </div>
-                {/* Sample Stories */}
-                {[1, 2, 3, 4, 5].map((story) => (
-                  <div key={story} className="flex-shrink-0">
-                    <div className="w-20 h-28 bg-gradient-to-b from-purple-400 to-blue-500 rounded-xl relative cursor-pointer hover:shadow-md transition-shadow duration-200">
-                      <div className="absolute top-2 left-2 w-6 h-6 bg-white rounded-full border-2 border-blue-500"></div>
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <span className="text-white text-xs font-medium">
-                          User {story}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+                {/* Active Stories */}
+                {stories.map((story) => (
+                  <StoryCard 
+                    key={story.id} 
+                    story={story} 
+                    onStoryClick={handleStoryClick}
+                  />
                 ))}
               </div>
             </div>
@@ -190,6 +226,20 @@ const HomePage: React.FC = () => {
         initialType={activePostType}
         onPostCreated={() => setReloadFeed(reloadFeed + 1)}
         onCreatePost={handleCreatePost}
+      />
+      {/* Create Story Modal */}
+      <CreateStoryModal
+        isOpen={isCreateStoryModalOpen}
+        onClose={() => setIsCreateStoryModalOpen(false)}
+        onStoryCreated={handleStoryCreated}
+      />
+      {/* Story View Modal */}
+      <StoryViewModal
+        story={selectedStory}
+        stories={stories}
+        isOpen={!!selectedStory}
+        onClose={() => setSelectedStory(null)}
+        onStoryChange={setSelectedStory}
       />
     </div>
   );

@@ -97,6 +97,18 @@ CREATE TABLE `users` (
   `bio` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+CREATE TABLE `stories` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` INT UNSIGNED NOT NULL,
+  `content` TEXT DEFAULT NULL,
+  `image_url` VARCHAR(255) DEFAULT NULL,
+  `game` VARCHAR(100) DEFAULT NULL,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `fk_stories_users_idx` (`user_id`),
+  CONSTRAINT `fk_stories_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 ALTER TABLE `comments`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_comments_posts_idx` (`post_id`),
