@@ -23,12 +23,57 @@
   }
 }
 
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes burstDot {
+  0% { opacity: 1; transform: scale(0.5) translate(0,0); }
+  60% { opacity: 1; transform: scale(1.2) translate(calc(32px * cos(var(--angle))), calc(32px * sin(var(--angle)))); }
+  100% { opacity: 0; transform: scale(0.8) translate(calc(40px * cos(var(--angle))), calc(40px * sin(var(--angle)))); }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.2s ease-out;
 }
 
 .animate-slideUp {
   animation: slideUp 0.3s ease-out;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 3s linear infinite;
+}
+
+.animate-gradientShift {
+  animation: gradientShift 3s linear infinite;
+  background-size: 200% 200%;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
 }
 
 /* Custom scrollbar */
@@ -62,17 +107,41 @@
   transition-duration: 150ms;
 }
 
-@keyframes slide-in-right {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+/* Hiệu ứng gradient shift cho logo */
+.logo-gradient-anim {
+  animation: gradientShift 3s linear infinite;
+  background-size: 200% 200%;
 }
 
-.animate-slide-in-right {
-  animation: slide-in-right 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+/* Hiệu ứng particle burst */
+.logo-burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 10;
 }
+.burst-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  opacity: 0;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa, #f472b6);
+  transform: scale(0.5);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.burst-active .burst-dot {
+  opacity: 1;
+  animation: burstDot 1s cubic-bezier(.61,-0.01,.45,1.36) 1;
+}
+.burst-dot-0 { --angle: 0deg; }
+.burst-dot-1 { --angle: 45deg; }
+.burst-dot-2 { --angle: 90deg; }
+.burst-dot-3 { --angle: 135deg; }
+.burst-dot-4 { --angle: 180deg; }
+.burst-dot-5 { --angle: 225deg; }
+.burst-dot-6 { --angle: 270deg; }
+.burst-dot-7 { --angle: 315deg; }

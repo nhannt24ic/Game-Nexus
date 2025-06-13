@@ -30,11 +30,56 @@ const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">G</span>
+          <div className={
+            `flex items-center space-x-3 cursor-pointer group transition-all duration-300`
+          } onClick={e => {
+            const burst = e.currentTarget.querySelector('.logo-burst');
+            if (burst) {
+              burst.classList.remove('burst-active');
+              // Force reflow để restart animation
+              void (burst as HTMLElement).offsetWidth;
+              burst.classList.add('burst-active');
+            }
+            // Chờ hiệu ứng burst xong mới chuyển trang nếu không ở trang chủ
+            if (window.location.pathname !== '/') {
+              setTimeout(() => navigate('/'), 400);
+            }
+          }}
+            onMouseEnter={e => {
+              const logo = e.currentTarget.querySelector('.modern-logo-anim');
+              if (logo) logo.classList.add('animate-bounce');
+            }}
+            onMouseLeave={e => {
+              const logo = e.currentTarget.querySelector('.modern-logo-anim');
+              if (logo) logo.classList.remove('animate-bounce');
+            }}
+          >
+            {/* New Modern Logo */}
+            <div className="relative w-12 h-12 flex items-center justify-center modern-logo-anim animate-pulse transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6">
+              {/* Outer Glow + Gradient Shift */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 blur-lg opacity-60 group-hover:opacity-80 group-hover:scale-110 transition-all duration-300 logo-gradient-anim"></div>
+              {/* Main Logo Circle */}
+              <div className="relative w-12 h-12 bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl border-2 border-white group-hover:shadow-2xl transition-all duration-300 logo-gradient-anim">
+                {/* Controller Icon */}
+                <svg className="w-7 h-7 text-white drop-shadow-lg group-hover:scale-110 transition-transform duration-300" fill="currentColor" viewBox="0 0 24 24">
+                  <rect x="4" y="8" width="16" height="8" rx="4" className="fill-white/80" />
+                  <circle cx="8.5" cy="12" r="1.2" className="fill-blue-500" />
+                  <circle cx="15.5" cy="12" r="1.2" className="fill-pink-500" />
+                  <rect x="11" y="10.5" width="2" height="3" rx="1" className="fill-purple-500" />
+                  <circle cx="12" cy="15.5" r="0.7" className="fill-yellow-400" />
+                </svg>
+                {/* Decorative Dots */}
+                <div className="absolute -top-1 -left-1 w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-pink-400 rounded-full animate-pulse"></div>
+                {/* Particle Burst */}
+                <div className="logo-burst pointer-events-none">
+                  {Array.from({length:8}).map((_,i) => (
+                    <span key={i} className={`burst-dot burst-dot-${i}`}></span>
+                  ))}
+                </div>
+              </div>
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent select-none group-hover:scale-105 transition-transform duration-300">
               GameNexus
             </h1>
           </div>
