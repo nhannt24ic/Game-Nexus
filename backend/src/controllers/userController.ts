@@ -144,3 +144,19 @@ export const getCurrentUserProfile = async (req: Request, res: Response): Promis
     res.status(500).json({ message: 'Lỗi máy chủ' });
   }
 };
+
+export const updateAvatar = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = (req.user as JwtPayload).id;
+    const { avatar_url } = req.body;
+    if (!avatar_url) {
+      res.status(400).json({ message: 'Thiếu avatar_url' });
+      return;
+    }
+    await db.query('UPDATE users SET avatar_url = ? WHERE id = ?', [avatar_url, userId]);
+    res.status(200).json({ message: 'Cập nhật avatar thành công', avatar_url });
+  } catch (error) {
+    console.error('Lỗi khi cập nhật avatar:', error);
+    res.status(500).json({ message: 'Lỗi máy chủ' });
+  }
+};
