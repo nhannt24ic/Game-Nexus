@@ -11,6 +11,7 @@ export interface Post {
   like_count: number;
   comment_count: number;
   images: { id: number; url: string }[] | null;
+  isLiked: boolean;
 }
 
 // Định nghĩa cấu trúc cho một người dùng (sẽ dùng ở nhiều nơi)
@@ -19,4 +20,9 @@ export interface User {
   nickname: string;
   avatar_url: string | null;
   points?: number; // points có thể có hoặc không
+}
+export interface Notification {
+  id: number;
+  message: string;
+  type: 'success' | 'error' | 'info'; // Các loại thông báo
 }

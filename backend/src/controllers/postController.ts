@@ -212,34 +212,51 @@ export const createComment = async (req: Request, res: Response): Promise<void> 
 };
 
 export const getAllPosts = async (req: Request, res: Response): Promise<void> => {
-  // Lấy tham số phân trang từ query string, ví dụ: /api/posts?page=1&limit=10
-  const page = parseInt(req.query.page as string, 10) || 1;
-  const limit = parseInt(req.query.limit as string, 10) || 10;
-  const offset = (page - 1) * limit;
+    const userId = (req.user as JwtPayload).id; // Lấy ID người dùng đang đăng nhập
+    const page = parseInt(req.query.page as string, 10) || 1;
+    const limit = parseInt(req.query.limit as string, 10) || 10;
+    const offset = (page - 1) * limit;
 
-  try {
-    const [posts] = await db.query<RowDataPacket[]>(`
-      SELECT 
-        p.id, 
-        p.content, 
-        p.created_at,
-        u.nickname AS author_nickname,
-        u.avatar_url AS author_avatar,
-        (SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS like_count,
-        (SELECT COUNT(*) FROM comments WHERE post_id = p.id) AS comment_count,
-        -- DÒNG THAY ĐỔI: Dùng GROUP_CONCAT thay cho JSON_ARRAYAGG
-        (SELECT CONCAT('[', GROUP_CONCAT(JSON_OBJECT('id', pi.id, 'url', pi.image_url)), ']') FROM post_images pi WHERE pi.post_id = p.id) AS images
-        FROM posts p
-        JOIN users u ON p.user_id = u.id
-        WHERE p.status = 'approved'
-        ORDER BY p.created_at DESC
-        LIMIT ?
-        OFFSET ?
-    `, [limit, offset]);
+    try {
+        const [posts] = await db.query<RowDataPacket[]>(`
+            SELECT 
+                p.id, 
+                p.content, 
+                p.created_at,
+                u.id as author_id,
+                u.nickname AS author_nickname,
+                u.avatar_url AS author_avatar,
+                (SELECT COUNT(*) FROM likes WHERE post_id = p.id) AS like_count,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id) AS comment_count,
+                (
+                    -- Subquery để kiểm tra xem người dùng hiện tại đã thích bài viết này chưa
+                    SELECT COUNT(*) > 0 
+                    FROM likes 
+                    WHERE likes.post_id = p.id AND likes.user_id = ?
+                ) AS isLiked,
+                (
+                    SELECT CONCAT('[', COALESCE(GROUP_CONCAT(JSON_OBJECT('id', pi.id, 'url', pi.image_url)), ''), ']') 
+                    FROM post_images pi 
+                    WHERE pi.post_id = p.id
+                ) AS images
+            FROM posts p
+            JOIN users u ON p.user_id = u.id
+            WHERE p.status = 'approved'
+            ORDER BY p.created_at DESC
+            LIMIT ?
+            OFFSET ?
+        `, [userId, limit, offset]); // Truyền userId vào câu lệnh SQL
 
-    res.status(200).json(posts);
-  } catch (error) {
-    console.error('Lỗi khi lấy danh sách bài viết:', error);
-    res.status(500).json({ message: 'Lỗi máy chủ' });
-  }
+        const processedPosts = posts.map(post => ({
+            ...post,
+            // Chuyển đổi kết quả isLiked từ 0/1 sang true/false
+            isLiked: Boolean(post.isLiked), 
+            images: JSON.parse(post.images)
+        }));
+
+        res.status(200).json(processedPosts);
+    } catch (error) {
+        console.error('Lỗi khi lấy danh sách bài viết:', error);
+        res.status(500).json({ message: 'Lỗi máy chủ' });
+    }
 };

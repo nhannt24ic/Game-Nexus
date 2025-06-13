@@ -38,6 +38,31 @@ const HomePage: React.FC = () => {
     setIsCreatePostModalOpen(true);
   };
 
+  // Thêm hàm handleCreatePost để gọi API backend
+  const handleCreatePost = async (content: string, images: File[]) => {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    const formData = new FormData();
+    formData.append('content', content);
+    images.forEach((img) => formData.append('images', img));
+    try {
+      const res = await fetch('http://localhost:3000/api/posts', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      if (res.ok) {
+        // Reload lại feed sau khi đăng bài thành công
+        setReloadFeed((prev) => prev + 1);
+      } else {
+        // Xử lý lỗi nếu cần
+        alert('Đăng bài thất bại!');
+      }
+    } catch {
+      alert('Lỗi kết nối backend!');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
       {/* Header */}
@@ -150,11 +175,12 @@ const HomePage: React.FC = () => {
         </div>
       </div>
       {/* Create Post Modal */}
-      <CreatePostModal 
+      <CreatePostModal
         isOpen={isCreatePostModalOpen}
         onClose={() => setIsCreatePostModalOpen(false)}
         initialType={activePostType}
         onPostCreated={() => setReloadFeed(reloadFeed + 1)}
+        onCreatePost={handleCreatePost}
       />
     </div>
   );

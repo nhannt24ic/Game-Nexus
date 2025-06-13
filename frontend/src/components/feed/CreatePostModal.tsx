@@ -2,14 +2,17 @@ import React, { useState, useRef, useEffect } from 'react';
 import ImageUpload from './ImageUpload';
 import EmojiPicker from './EmojiPicker';
 import GameSelector from './GameSelector';
+import Avatar from '../common/Avatar';
 
 interface CreatePostModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialType?: 'general' | 'photo' | 'game' | 'stream';
+  onPostCreated?: () => void;
+  onCreatePost?: (content: string, images: File[]) => void;
 }
 
-const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, initialType = 'general' }) => {
+const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, initialType = 'general', onPostCreated, onCreatePost }) => {
   const [postContent, setPostContent] = useState('');
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [selectedGame, setSelectedGame] = useState('');
@@ -43,8 +46,19 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, init
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!postContent.trim() && selectedImages.length === 0) return;
-
     setIsLoading(true);
+    if (onCreatePost) {
+      await onCreatePost(postContent, selectedImages);
+      setIsLoading(false);
+      setPostContent('');
+      setSelectedImages([]);
+      setSelectedGame('');
+      setShowEmojiPicker(false);
+      setShowGameSelector(false);
+      if (onPostCreated) onPostCreated();
+      onClose();
+      return;
+    }
     
     // Simulate API call
     setTimeout(() => {
@@ -113,11 +127,11 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({ isOpen, onClose, init
         {/* User Info */}
         <div className="p-6 pb-4">
           <div className="flex items-center space-x-3">
-            {user && user.avatar_url ? (
-              <img src={user.avatar_url.startsWith('http') ? user.avatar_url : `http://localhost:3000${user.avatar_url}`} alt="avatar" className="w-12 h-12 rounded-full object-cover border-2 border-cyber-purple" />
+            {user ? (
+              <Avatar user={{ id: 0, nickname: user.nickname, avatar_url: user.avatar_url }} className="w-12 h-12 border-2 border-cyber-purple" />
             ) : (
               <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">{user ? user.nickname.charAt(0).toUpperCase() : '?'}</span>
+                <span className="text-white font-bold text-lg">?</span>
               </div>
             )}
             <div>
